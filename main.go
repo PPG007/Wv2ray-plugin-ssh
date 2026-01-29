@@ -180,6 +180,7 @@ func (p *SSHPlugin) GetInfo(ctx context.Context, req *pb_plugin.EmptyRequest) (*
 							FieldLabel: p.t("plugin.username"),
 							FieldType:  pb_plugin.ConfigFieldType_INPUT,
 							ValueType:  pb_plugin.ConfigFieldValueType_STRING,
+							Required:   true,
 						},
 						{
 							Field:      PASSWORD_KEY,
@@ -237,7 +238,6 @@ func (p *SSHPlugin) Handshake(stream pb_plugin.PluginOutbound_HandshakeServer) e
 	)
 	defer serverConn.Close()
 	defer clientConn.Close()
-	defer close(errChan)
 	go func() {
 		// serverConn -> grpc stream
 		buffer := make([]byte, 8*1024)
@@ -330,7 +330,6 @@ func (p *SSHPlugin) Process(stream pb_plugin.PluginOutbound_ProcessServer) error
 	defer sshChannel.Close()
 	go ssh.DiscardRequests(reqs)
 	errChan := make(chan error, 5)
-	defer close(errChan)
 	go func() {
 		// destination -> grpc stream
 		buffer := make([]byte, 8*1024)
