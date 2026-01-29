@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package wv2ray.plugin;
+
+option go_package = "wv2ray/proto/plugin";
+
+import "plugin/common.proto";
+
+// ConfigFieldType defines the type of a configuration field.
+enum ConfigFieldType {
+  INPUT  = 0;
+  SELECT = 1;
+}
+
+// ConfigFieldValueType defines the value type of a configuration field.
+enum ConfigFieldValueType {
+  STRING = 0;
+  INT    = 1;
+  BOOL   = 2;
+  MAP    = 3;
+}
+
+// ConfigFieldValue represents the value of a configuration field.
+message ConfigFieldValue {
+  oneof value {
+    string   str_value  = 1;
+    int64    int_value  = 2;
+    bool     bool_value = 3;
+    MapValue map_value  = 4;
+  }
+}
+
+// SelectOption represents an option for selection-type configuration fields.
+message SelectOption {
+  string label = 1;
+  oneof value {
+    string str_value = 2;
+    int64  int_value = 3;
+  }
+}
+
+// ProtocolConfigProperty represents a configuration property for a protocol.
+message ProtocolConfigProperty {
+  string                field         = 1;
+  string                field_label   = 2;
+  ConfigFieldType       field_type    = 3;
+  ConfigFieldValueType  value_type    = 4;
+  ConfigFieldValue      value         = 5;
+  bool                  required      = 6;
+  repeated SelectOption options       = 7;
+  ConfigFieldValue      default_value = 8;
+}
+
+// ProtocolConfigProperties represents a collection of ProtocolConfigProperty messages.
+message ProtocolConfigProperties {
+  repeated ProtocolConfigProperty properties = 1;
+}
+
+// ProtocolConfigDetail represents the configuration details for a specific protocol.
+message ProtocolConfigDetail {
+  string                   protocol   = 1;
+  ProtocolConfigProperties properties = 2;
+}
+
+// ProtocolConfigList represents a list of protocol configuration details.
+message ProtocolConfigList {
+  repeated ProtocolConfigDetail protocols = 1;
+}
+
+// BriefProtocolProperty represents a brief configuration property with only field and value.
+message BriefProtocolProperty {
+  string           field = 1;
+  ConfigFieldValue value = 2;
+}
+
+// BriefProtocolProperties represents a collection of brief protocol properties.
+message BriefProtocolProperties {
+  repeated BriefProtocolProperty properties = 1;
+}

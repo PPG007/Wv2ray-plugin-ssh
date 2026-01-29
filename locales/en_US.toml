@@ -1,0 +1,9 @@
+[plugin]
+inputString = "Input String"
+inputNumber = "Input Number"
+inputBool = "Input Boolean"
+inputMap = "Input Map"
+selectString = "Select String"
+selectNumber = "Select Number"
+selectOption1 = "Option 1"
+selectOption2 = "Option 2"

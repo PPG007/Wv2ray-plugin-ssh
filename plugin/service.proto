@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package wv2ray.plugin;
+
+option go_package = "wv2ray/proto/plugin";
+
+import "plugin/protocol_configuer.proto";
+
+// EmptyRequest represents an empty request message.
+message EmptyRequest {}
+
+// EmptyResponse represents an empty response message.
+message EmptyResponse {}
+
+// PluginInfo represents information about a plugin.
+message PluginInfo {
+  string                        name        = 1;
+  string                        author      = 2;
+  bytes                         logo        = 3;
+  string                        description = 4;
+  string                        version     = 5;
+  repeated ProtocolConfigDetail protocols   = 6;
+}
+
+// NewHandlerRequest represents a request to create a new handler.
+message NewHandlerRequest {
+  string                         id         = 1;
+  string                         protocol   = 2;
+  repeated BriefProtocolProperty properties = 3;
+}
+
+// SetLocaleRequest represents a request to set the locale.
+message SetLocaleRequest {
+  string language = 1;
+}
+
+// ShutdownHandlerRequest represents a request to shut down a handler.
+message ShutdownHandlerRequest {
+  string id = 1;
+}
+
+// HandshakeData represents a chunk of handshake data.
+message HandshakeData {
+  string handler_id = 1;
+  bytes  data       = 2;
+  bool   ready      = 3;
+}
+
+// Network defines the type of network protocol.
+enum Network {
+  NETWORK_TCP = 0;
+  NETWORK_UDP = 1;
+}
+
+// TransportData represents a chunk of transport data.
+message TransportData {
+  string  handler_id = 1;
+  Network network    = 2;
+  string  dest_addr  = 3;
+  uint64  dest_port  = 4;
+  bytes   data       = 5;
+}
+
+// PluginOutbound defines the outbound plugin service.
+service PluginOutbound {
+  // HealthCheck checks the health status of the plugin.
+  rpc HealthCheck(EmptyRequest) returns (EmptyResponse);
+  // GetInfo retrieves information about the plugin.
+  rpc GetInfo(EmptyRequest) returns (PluginInfo);
+  // Init initializes the plugin.
+  rpc Init(EmptyRequest) returns (EmptyResponse);
+  // NewHandler creates a new handler with the given protocol properties.
+  rpc NewHandler(NewHandlerRequest) returns (EmptyResponse);
+  // SetLocale sets the locale for the plugin.
+  rpc SetLocale(SetLocaleRequest) returns (EmptyResponse);
+  // ShutdownHandler shuts down the handler with the specified ID.
+  rpc ShutdownHandler(ShutdownHandlerRequest) returns (EmptyResponse);
+  // Handshake performs a handshake for streaming data.
+  rpc Handshake(stream HandshakeData) returns (stream HandshakeData);
+  // Process processes streaming data.
+  rpc Process(stream TransportData) returns (stream TransportData);
+}

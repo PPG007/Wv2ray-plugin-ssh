@@ -1,0 +1,9 @@
+[plugin]
+inputString = "输入字符串"
+inputNumber = "输入数字"
+inputBool = "输入布尔值"
+inputMap = "输入字典"
+selectString = "选择字符串"
+selectNumber = "选择数字"
+selectOption1 = "选项 1"
+selectOption2 = "选项 2"

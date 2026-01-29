@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package wv2ray.plugin;
+
+option go_package = "wv2ray/proto/plugin";
+
+// MapEntry represents a single key-value pair in a map.
+message MapEntry {
+  string key   = 1;
+  string value = 2;
+}
+
+// MapValue represents a map of string key-value pairs.
+message MapValue {
+  repeated MapEntry entries = 1;
+}

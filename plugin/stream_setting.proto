@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package wv2ray.plugin;
+
+option go_package = "wv2ray/proto/plugin";
+
+import "plugin/common.proto";
+
+// StreamNetWork defines the type of network for stream settings.
+enum StreamNetWork {
+  TCP  = 0;
+  KCP  = 1;
+  GRPC = 2;
+  WS   = 3;
+}
+
+// StreamTCPSetting represents TCP-specific stream settings.
+message StreamTCPSetting {}
+
+// StreamKCPSetting represents KCP-specific stream settings.
+message StreamKCPSetting {
+  int64  mtu               = 1;
+  int64  tti               = 2;
+  int64  uplink_capacity   = 3;
+  int64  downlink_capacity = 4;
+  bool   congestion        = 5;
+  int64  read_buffer_size  = 6;
+  int64  write_buffer_size = 7;
+  string header_type       = 8;
+  string header_domain     = 9;
+  string seed              = 10;
+}
+
+// StreamGrpcSetting represents gRPC-specific stream settings.
+message StreamGrpcSetting {
+  string authority             = 1;
+  string service_name          = 2;
+  string user_agent            = 3;
+  int64  idle_timeout          = 4;
+  int64  health_check_timeout  = 5;
+  bool   permit_without_stream = 6;
+  int64  initial_windows_size  = 7;
+}
+
+// StreamWSSetting represents WebSocket-specific stream settings.
+message StreamWSSetting {
+  string   path             = 1;
+  string   host             = 2;
+  MapValue headers          = 3;
+  int64    heartbeat_period = 4;
+}
+
+// CertificateUsage defines the usage type of a certificate.
+enum CertificateUsage {
+  ENCIPHERMENT = 0;
+  VERIFY       = 1;
+  ISSUE        = 2;
+}
+
+// ServerCertificate represents a server certificate for TLS settings.
+message ServerCertificate {
+  int64            ocsp_stapling    = 1;
+  bool             one_time_loading = 2;
+  CertificateUsage usage            = 3;
+  string           certificate_file = 4;
+  string           key_file         = 5;
+}
+
+// StreamTLSSetting represents TLS-specific stream settings.
+message StreamTLSSetting {
+  string                     server_name               = 1;
+  repeated string            verify_peer_cert_in_names = 2;
+  repeated string            alpn                      = 3;
+  string                     min_version               = 4;
+  string                     max_version               = 5;
+  repeated string            cipher_suites             = 6;
+  bool                       allow_insecure            = 7;
+  bool                       disable_system_root       = 8;
+  string                     fingerprint               = 9;
+  repeated ServerCertificate certificates              = 10;
+}
+
+// StreamSettings represents the stream settings for a connection.
+message StreamSettings {
+  StreamNetWork     network  = 1;
+  string            security = 2;
+  StreamTLSSetting  tls      = 3;
+  StreamTCPSetting  tcp      = 4;
+  StreamKCPSetting  kcp      = 5;
+  StreamGrpcSetting grpc     = 6;
+  StreamWSSetting   ws       = 7;
+}

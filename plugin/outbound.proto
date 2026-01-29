@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package wv2ray.plugin;
+
+option go_package = "wv2ray/proto/plugin";
+
+import "plugin/protocol_configuer.proto";
+
+// PluginOutboundConfig represents the configuration for an outbound plugin.
+message PluginOutboundConfig {
+  string                         protocol   = 1;
+  string                         address    = 2;
+  uint32                         port       = 3;
+  string                         name       = 4;
+  repeated BriefProtocolProperty properties = 5;
+}

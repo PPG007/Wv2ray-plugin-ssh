@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package wv2ray.plugin;
+
+option go_package = "wv2ray/proto/plugin";
+
+// MuxSetting represents the multiplexing settings for a connection.
+message MuxSetting {
+  bool   enabled           = 1;
+  int64  concurrency       = 2;
+  int64  xudp_concurrency  = 3;
+  string xudp_proxy_udp443 = 4;
+}
