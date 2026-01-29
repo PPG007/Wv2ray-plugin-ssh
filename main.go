@@ -8,29 +8,29 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 
 	pb_plugin "wv2ray-plugin-template/plugin"
 
 	"github.com/BurntSushi/toml"
 	"github.com/hashicorp/go-plugin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/crypto/ssh"
 	"golang.org/x/text/language"
 )
 
 const (
-	PLUGIN_NAME        = "wv2ray-plugin-template"
+	PLUGIN_NAME        = "wv2ray-plugin-ssh"
 	PLUGIN_AUTHOR      = "Your Name"
 	PLUGIN_VERSION     = "v1.0.0"
-	PLUGIN_DESCRIPTION = "A template plugin for WV2Ray"
+	PLUGIN_DESCRIPTION = "A SSH plugin for WV2Ray"
 
-	PROTOCOL_TEMPLATE = "template"
+	PROTOCOL_SSH = "ssh"
 
-	INPUT_STRING_KEY  = "inputString"
-	INPUT_NUMBER_KEY  = "inputNumber"
-	INPUT_BOOL_KEY    = "inputBool"
-	INPUT_MAP_KEY     = "inputMap"
-	SELECT_STRING_KEY = "selectString"
-	SELECT_NUMBER_KEY = "selectNumber"
+	USERNAME_KEY = "username"
+	PASSWORD_KEY = "password"
+
+	DEFAULT_TIMEOUT = 5 * time.Second
 )
 
 //go:embed locales/*.toml
@@ -47,7 +47,7 @@ var (
 	ErrUnsupportedProtocol  = errors.New("unsupported protocol")
 )
 
-type TemplatePlugin struct {
+type SSHPlugin struct {
 	pb_plugin.UnimplementedPluginOutboundServer
 
 	bundle          *i18n.Bundle
@@ -55,22 +55,56 @@ type TemplatePlugin struct {
 	localizers      map[string]*i18n.Localizer
 	lock            *sync.Mutex
 	handlers        sync.Map
+	pool            sync.Pool
 }
 
-type templateHandler struct {
+type sshHandler struct {
+	id         string
+	ready      bool
+	client     *ssh.Client
 	properties []*pb_plugin.BriefProtocolProperty
 }
 
-func NewTemplatePlugin() *TemplatePlugin {
-	return &TemplatePlugin{
+func (s *sshHandler) getUsername() string {
+	for _, prop := range s.properties {
+		if prop.Field == USERNAME_KEY {
+			return prop.Value.GetStrValue()
+		}
+	}
+	return ""
+}
+
+func (s *sshHandler) getPassword() string {
+	for _, prop := range s.properties {
+		if prop.Field == PASSWORD_KEY {
+			return prop.Value.GetStrValue()
+		}
+	}
+	return ""
+}
+
+func (s *sshHandler) reset() {
+	s.id = ""
+	s.ready = false
+	s.client = nil
+	s.properties = []*pb_plugin.BriefProtocolProperty{}
+}
+
+func NewSSHPlugin() *SSHPlugin {
+	return &SSHPlugin{
 		localizers:      make(map[string]*i18n.Localizer),
 		lock:            &sync.Mutex{},
 		handlers:        sync.Map{},
 		currentLanguage: pb_plugin.DEFAULT_LANGUAGE,
+		pool: sync.Pool{
+			New: func() any {
+				return &sshHandler{}
+			},
+		},
 	}
 }
 
-func (p *TemplatePlugin) t(key string) string {
+func (p *SSHPlugin) t(key string) string {
 	localizer := p.localizers[p.currentLanguage]
 	if localizer == nil {
 		localizer = i18n.NewLocalizer(p.bundle, p.currentLanguage)
@@ -90,7 +124,7 @@ func (p *TemplatePlugin) t(key string) string {
 	return message
 }
 
-func (p *TemplatePlugin) Init(ctx context.Context, req *pb_plugin.EmptyRequest) (*pb_plugin.EmptyResponse, error) {
+func (p *SSHPlugin) Init(ctx context.Context, req *pb_plugin.EmptyRequest) (*pb_plugin.EmptyResponse, error) {
 	defaultLang, err := language.Parse(pb_plugin.DEFAULT_LANGUAGE)
 	if err != nil {
 		return nil, err
@@ -113,7 +147,7 @@ func (p *TemplatePlugin) Init(ctx context.Context, req *pb_plugin.EmptyRequest) 
 	return &pb_plugin.EmptyResponse{}, nil
 }
 
-func (p *TemplatePlugin) SetLocale(ctx context.Context, req *pb_plugin.SetLocaleRequest) (*pb_plugin.EmptyResponse, error) {
+func (p *SSHPlugin) SetLocale(ctx context.Context, req *pb_plugin.SetLocaleRequest) (*pb_plugin.EmptyResponse, error) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	if p.bundle == nil {
@@ -129,7 +163,7 @@ func (p *TemplatePlugin) SetLocale(ctx context.Context, req *pb_plugin.SetLocale
 	return &pb_plugin.EmptyResponse{}, nil
 }
 
-func (p *TemplatePlugin) GetInfo(ctx context.Context, req *pb_plugin.EmptyRequest) (*pb_plugin.PluginInfo, error) {
+func (p *SSHPlugin) GetInfo(ctx context.Context, req *pb_plugin.EmptyRequest) (*pb_plugin.PluginInfo, error) {
 	return &pb_plugin.PluginInfo{
 		Name:        PLUGIN_NAME,
 		Author:      PLUGIN_AUTHOR,
@@ -138,72 +172,20 @@ func (p *TemplatePlugin) GetInfo(ctx context.Context, req *pb_plugin.EmptyReques
 		Version:     PLUGIN_VERSION,
 		Protocols: []*pb_plugin.ProtocolConfigDetail{
 			{
-				Protocol: PROTOCOL_TEMPLATE,
+				Protocol: PROTOCOL_SSH,
 				Properties: &pb_plugin.ProtocolConfigProperties{
 					Properties: []*pb_plugin.ProtocolConfigProperty{
 						{
-							Field:      INPUT_STRING_KEY,
-							FieldLabel: p.t("plugin.inputString"),
+							Field:      USERNAME_KEY,
+							FieldLabel: p.t("plugin.username"),
 							FieldType:  pb_plugin.ConfigFieldType_INPUT,
 							ValueType:  pb_plugin.ConfigFieldValueType_STRING,
 						},
 						{
-							Field:      INPUT_NUMBER_KEY,
-							FieldLabel: p.t("plugin.inputNumber"),
+							Field:      PASSWORD_KEY,
+							FieldLabel: p.t("plugin.password"),
 							FieldType:  pb_plugin.ConfigFieldType_INPUT,
-							ValueType:  pb_plugin.ConfigFieldValueType_INT,
-						},
-						{
-							Field:      INPUT_BOOL_KEY,
-							FieldLabel: p.t("plugin.inputBool"),
-							FieldType:  pb_plugin.ConfigFieldType_INPUT,
-							ValueType:  pb_plugin.ConfigFieldValueType_BOOL,
-						},
-						{
-							Field:      INPUT_MAP_KEY,
-							FieldLabel: p.t("plugin.inputMap"),
-							FieldType:  pb_plugin.ConfigFieldType_INPUT,
-							ValueType:  pb_plugin.ConfigFieldValueType_MAP,
-						},
-						{
-							Field:      SELECT_STRING_KEY,
-							FieldLabel: p.t("plugin.selectString"),
-							FieldType:  pb_plugin.ConfigFieldType_SELECT,
 							ValueType:  pb_plugin.ConfigFieldValueType_STRING,
-							Options: []*pb_plugin.SelectOption{
-								{
-									Label: p.t("plugin.selectOption1"),
-									Value: &pb_plugin.SelectOption_StrValue{
-										StrValue: "option1",
-									},
-								},
-								{
-									Label: p.t("plugin.selectOption2"),
-									Value: &pb_plugin.SelectOption_StrValue{
-										StrValue: "option2",
-									},
-								},
-							},
-						},
-						{
-							Field:      SELECT_NUMBER_KEY,
-							FieldLabel: p.t("plugin.selectNumber"),
-							FieldType:  pb_plugin.ConfigFieldType_SELECT,
-							ValueType:  pb_plugin.ConfigFieldValueType_INT,
-							Options: []*pb_plugin.SelectOption{
-								{
-									Label: p.t("plugin.selectOption1"),
-									Value: &pb_plugin.SelectOption_IntValue{
-										IntValue: 1,
-									},
-								},
-								{
-									Label: p.t("plugin.selectOption2"),
-									Value: &pb_plugin.SelectOption_IntValue{
-										IntValue: 2,
-									},
-								},
-							},
 						},
 					},
 				},
@@ -212,24 +194,34 @@ func (p *TemplatePlugin) GetInfo(ctx context.Context, req *pb_plugin.EmptyReques
 	}, nil
 }
 
-func (p *TemplatePlugin) NewHandler(ctx context.Context, req *pb_plugin.NewHandlerRequest) (*pb_plugin.EmptyResponse, error) {
+func (p *SSHPlugin) NewHandler(ctx context.Context, req *pb_plugin.NewHandlerRequest) (*pb_plugin.EmptyResponse, error) {
 	_, ok := p.handlers.Load(req.Id)
 	if ok {
 		return nil, ErrHandlerExists
 	}
-	handler := &templateHandler{
-		properties: req.Properties,
-	}
+	handler := p.pool.Get().(*sshHandler)
+	handler.id = req.Id
+	handler.properties = req.Properties
 	p.handlers.Store(req.Id, handler)
 	return &pb_plugin.EmptyResponse{}, nil
 }
 
-func (p *TemplatePlugin) ShutdownHandler(ctx context.Context, req *pb_plugin.ShutdownHandlerRequest) (*pb_plugin.EmptyResponse, error) {
+func (p *SSHPlugin) ShutdownHandler(ctx context.Context, req *pb_plugin.ShutdownHandlerRequest) (*pb_plugin.EmptyResponse, error) {
+	rawHandler, ok := p.handlers.Load(req.Id)
+	if !ok {
+		return nil, ErrHandlerNotExists
+	}
+	handler := rawHandler.(*sshHandler)
+	if handler.client != nil {
+		handler.client.Close()
+	}
 	p.handlers.Delete(req.Id)
+	handler.reset()
+	p.pool.Put(handler)
 	return &pb_plugin.EmptyResponse{}, nil
 }
 
-func (p *TemplatePlugin) Handshake(stream pb_plugin.PluginOutbound_HandshakeServer) error {
+func (p *SSHPlugin) Handshake(stream pb_plugin.PluginOutbound_HandshakeServer) error {
 	data, err := stream.Recv()
 	if err != nil {
 		return err
@@ -238,20 +230,77 @@ func (p *TemplatePlugin) Handshake(stream pb_plugin.PluginOutbound_HandshakeServ
 	if !ok {
 		return ErrHandlerNotExists
 	}
-	handler := raw.(*templateHandler)
-	clientConn, serverConn := net.Pipe()
-	fmt.Println(handler, clientConn, serverConn) // remove this line
+	var (
+		handler                = raw.(*sshHandler)
+		clientConn, serverConn = net.Pipe()
+		errChan                = make(chan error, 5)
+	)
+	defer serverConn.Close()
+	defer clientConn.Close()
+	defer close(errChan)
 	go func() {
 		// serverConn -> grpc stream
+		buffer := make([]byte, 8*1024)
+		for {
+			n, err := clientConn.Read(buffer)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			err = stream.Send(&pb_plugin.HandshakeData{
+				HandlerId: handler.id,
+				Data:      buffer[:n],
+			})
+			if err != nil {
+				errChan <- err
+				return
+			}
+		}
 	}()
 	go func() {
 		// grpc stream -> clientConn
+		for {
+			data, err := stream.Recv()
+			if err != nil {
+				errChan <- err
+				return
+			}
+			if len(data.Data) > 0 {
+				_, err = clientConn.Write(data.Data)
+				if err != nil {
+					errChan <- err
+					return
+				}
+			}
+		}
 	}()
-	// do something with clientConn and handler
-	return nil
+	sshConn, chans, reqs, err := ssh.NewClientConn(serverConn, "", &ssh.ClientConfig{
+		User: handler.getUsername(),
+		Auth: []ssh.AuthMethod{
+			ssh.Password(handler.getPassword()),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         DEFAULT_TIMEOUT,
+	})
+	if err != nil {
+		return err
+	}
+	client := ssh.NewClient(sshConn, chans, reqs)
+	handler.ready = true
+	handler.client = client
+	err = stream.Send(&pb_plugin.HandshakeData{
+		HandlerId: handler.id,
+		Ready:     true,
+	})
+	if err != nil {
+		return err
+	}
+	go ssh.DiscardRequests(reqs)
+	err = <-errChan
+	return err
 }
 
-func (p *TemplatePlugin) Process(stream pb_plugin.PluginOutbound_ProcessServer) error {
+func (p *SSHPlugin) Process(stream pb_plugin.PluginOutbound_ProcessServer) error {
 	data, err := stream.Recv()
 	if err != nil {
 		return err
@@ -260,22 +309,80 @@ func (p *TemplatePlugin) Process(stream pb_plugin.PluginOutbound_ProcessServer) 
 	if !ok {
 		return ErrHandlerNotExists
 	}
-	handler := raw.(*templateHandler)
-	fmt.Println(handler) // remove this line
+	handler := raw.(*sshHandler)
+	if !handler.ready {
+		return ErrHandlerNotReady
+	}
+	sshChannel, reqs, err := handler.client.OpenChannel("direct-tcpip", ssh.Marshal(&struct {
+		Host       string
+		Port       uint32
+		OriginAddr string
+		OriginPort uint32
+	}{
+		Host:       data.DestAddr,
+		Port:       uint32(data.DestPort),
+		OriginAddr: "127.0.0.1",
+		OriginPort: 0,
+	}))
+	if err != nil {
+		return err
+	}
+	defer sshChannel.Close()
+	go ssh.DiscardRequests(reqs)
+	errChan := make(chan error, 5)
+	defer close(errChan)
 	go func() {
 		// destination -> grpc stream
+		buffer := make([]byte, 8*1024)
+		for {
+			n, err := sshChannel.Read(buffer)
+			if err != nil {
+				errChan <- err
+				return
+			}
+			err = stream.Send(&pb_plugin.TransportData{
+				HandlerId: data.HandlerId,
+				Data:      buffer[:n],
+			})
+			if err != nil {
+				errChan <- err
+				return
+			}
+		}
 	}()
 	go func() {
 		// grpc stream -> destination
+		if len(data.Data) > 0 {
+			_, err := sshChannel.Write(data.Data)
+			if err != nil {
+				errChan <- err
+				return
+			}
+		}
+		for {
+			data, err := stream.Recv()
+			if err != nil {
+				errChan <- err
+				return
+			}
+			if len(data.Data) > 0 {
+				_, err = sshChannel.Write(data.Data)
+				if err != nil {
+					errChan <- err
+					return
+				}
+			}
+		}
 	}()
-	return nil
+	err = <-errChan
+	return err
 }
 
 func main() {
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: pb_plugin.Handshake,
 		Plugins: plugin.PluginSet{
-			pb_plugin.PLUGIN_NAME: pb_plugin.NewPlugin(NewTemplatePlugin()),
+			pb_plugin.PLUGIN_NAME: pb_plugin.NewPlugin(NewSSHPlugin()),
 		},
 		GRPCServer: pb_plugin.NewGrpcServer,
 	})
