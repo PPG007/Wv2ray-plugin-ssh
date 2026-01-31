@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	PluginOutbound_HealthCheck_FullMethodName     = "/wv2ray.plugin.PluginOutbound/HealthCheck"
 	PluginOutbound_GetInfo_FullMethodName         = "/wv2ray.plugin.PluginOutbound/GetInfo"
 	PluginOutbound_Init_FullMethodName            = "/wv2ray.plugin.PluginOutbound/Init"
 	PluginOutbound_NewHandler_FullMethodName      = "/wv2ray.plugin.PluginOutbound/NewHandler"
@@ -34,6 +35,8 @@ const (
 //
 // PluginOutbound defines the outbound plugin service.
 type PluginOutboundClient interface {
+	// HealthCheck checks the health status of the plugin.
+	HealthCheck(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*EmptyResponse, error)
 	// GetInfo retrieves information about the plugin.
 	GetInfo(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*PluginInfo, error)
 	// Init initializes the plugin.
@@ -56,6 +59,16 @@ type pluginOutboundClient struct {
 
 func NewPluginOutboundClient(cc grpc.ClientConnInterface) PluginOutboundClient {
 	return &pluginOutboundClient{cc}
+}
+
+func (c *pluginOutboundClient) HealthCheck(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*EmptyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmptyResponse)
+	err := c.cc.Invoke(ctx, PluginOutbound_HealthCheck_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *pluginOutboundClient) GetInfo(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*PluginInfo, error) {
@@ -140,6 +153,8 @@ type PluginOutbound_ProcessClient = grpc.BidiStreamingClient[TransportData, Tran
 //
 // PluginOutbound defines the outbound plugin service.
 type PluginOutboundServer interface {
+	// HealthCheck checks the health status of the plugin.
+	HealthCheck(context.Context, *EmptyRequest) (*EmptyResponse, error)
 	// GetInfo retrieves information about the plugin.
 	GetInfo(context.Context, *EmptyRequest) (*PluginInfo, error)
 	// Init initializes the plugin.
@@ -164,6 +179,9 @@ type PluginOutboundServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPluginOutboundServer struct{}
 
+func (UnimplementedPluginOutboundServer) HealthCheck(context.Context, *EmptyRequest) (*EmptyResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method HealthCheck not implemented")
+}
 func (UnimplementedPluginOutboundServer) GetInfo(context.Context, *EmptyRequest) (*PluginInfo, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetInfo not implemented")
 }
@@ -204,6 +222,24 @@ func RegisterPluginOutboundServer(s grpc.ServiceRegistrar, srv PluginOutboundSer
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&PluginOutbound_ServiceDesc, srv)
+}
+
+func _PluginOutbound_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluginOutboundServer).HealthCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PluginOutbound_HealthCheck_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluginOutboundServer).HealthCheck(ctx, req.(*EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _PluginOutbound_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -317,6 +353,10 @@ var PluginOutbound_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "wv2ray.plugin.PluginOutbound",
 	HandlerType: (*PluginOutboundServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "HealthCheck",
+			Handler:    _PluginOutbound_HealthCheck_Handler,
+		},
 		{
 			MethodName: "GetInfo",
 			Handler:    _PluginOutbound_GetInfo_Handler,

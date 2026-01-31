@@ -124,6 +124,10 @@ func (p *SSHPlugin) t(key string) string {
 	return message
 }
 
+func (p *SSHPlugin) HealthCheck(ctx context.Context, req *pb_plugin.EmptyRequest) (*pb_plugin.EmptyResponse, error) {
+	return &pb_plugin.EmptyResponse{}, nil
+}
+
 func (p *SSHPlugin) Init(ctx context.Context, req *pb_plugin.EmptyRequest) (*pb_plugin.EmptyResponse, error) {
 	defaultLang, err := language.Parse(pb_plugin.DEFAULT_LANGUAGE)
 	if err != nil {

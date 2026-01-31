@@ -14,3 +14,18 @@ message MapEntry {
 message MapValue {
   repeated MapEntry entries = 1;
 }
+
+// PluginDetail contains metadata about a plugin.
+message PluginDetail {
+  string          name        = 1;
+  string          author      = 2;
+  string          description = 3;
+  string          version     = 4;
+  bytes           logo        = 5;
+  repeated string protocols   = 6;
+}
+
+// ListPluginsResponse is the response message for listing plugins.
+message ListPluginsResponse {
+  repeated PluginDetail items = 1;
+}

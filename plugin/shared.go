@@ -26,6 +26,11 @@ var Handshake = plugin.HandshakeConfig{
 	MagicCookieValue: "WV2RAY_PLUGIN",
 }
 
+var Reattach = &plugin.ReattachConfig{
+	Protocol:        plugin.ProtocolGRPC,
+	ProtocolVersion: 1,
+}
+
 type Plugin struct {
 	plugin.Plugin
 	server PluginOutboundServer

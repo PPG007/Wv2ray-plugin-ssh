@@ -555,8 +555,9 @@ const file_plugin_service_proto_rawDesc = "" +
 	"\x04data\x18\x05 \x01(\fR\x04data*+\n" +
 	"\aNetwork\x12\x0f\n" +
 	"\vNETWORK_TCP\x10\x00\x12\x0f\n" +
-	"\vNETWORK_UDP\x10\x012\xa0\x04\n" +
-	"\x0ePluginOutbound\x12A\n" +
+	"\vNETWORK_UDP\x10\x012\xea\x04\n" +
+	"\x0ePluginOutbound\x12H\n" +
+	"\vHealthCheck\x12\x1b.wv2ray.plugin.EmptyRequest\x1a\x1c.wv2ray.plugin.EmptyResponse\x12A\n" +
 	"\aGetInfo\x12\x1b.wv2ray.plugin.EmptyRequest\x1a\x19.wv2ray.plugin.PluginInfo\x12A\n" +
 	"\x04Init\x12\x1b.wv2ray.plugin.EmptyRequest\x1a\x1c.wv2ray.plugin.EmptyResponse\x12L\n" +
 	"\n" +
@@ -597,22 +598,24 @@ var file_plugin_service_proto_depIdxs = []int32{
 	9,  // 0: wv2ray.plugin.PluginInfo.protocols:type_name -> wv2ray.plugin.ProtocolConfigDetail
 	10, // 1: wv2ray.plugin.NewHandlerRequest.properties:type_name -> wv2ray.plugin.BriefProtocolProperty
 	0,  // 2: wv2ray.plugin.TransportData.network:type_name -> wv2ray.plugin.Network
-	1,  // 3: wv2ray.plugin.PluginOutbound.GetInfo:input_type -> wv2ray.plugin.EmptyRequest
-	1,  // 4: wv2ray.plugin.PluginOutbound.Init:input_type -> wv2ray.plugin.EmptyRequest
-	4,  // 5: wv2ray.plugin.PluginOutbound.NewHandler:input_type -> wv2ray.plugin.NewHandlerRequest
-	5,  // 6: wv2ray.plugin.PluginOutbound.SetLocale:input_type -> wv2ray.plugin.SetLocaleRequest
-	6,  // 7: wv2ray.plugin.PluginOutbound.ShutdownHandler:input_type -> wv2ray.plugin.ShutdownHandlerRequest
-	7,  // 8: wv2ray.plugin.PluginOutbound.Handshake:input_type -> wv2ray.plugin.HandshakeData
-	8,  // 9: wv2ray.plugin.PluginOutbound.Process:input_type -> wv2ray.plugin.TransportData
-	3,  // 10: wv2ray.plugin.PluginOutbound.GetInfo:output_type -> wv2ray.plugin.PluginInfo
-	2,  // 11: wv2ray.plugin.PluginOutbound.Init:output_type -> wv2ray.plugin.EmptyResponse
-	2,  // 12: wv2ray.plugin.PluginOutbound.NewHandler:output_type -> wv2ray.plugin.EmptyResponse
-	2,  // 13: wv2ray.plugin.PluginOutbound.SetLocale:output_type -> wv2ray.plugin.EmptyResponse
-	2,  // 14: wv2ray.plugin.PluginOutbound.ShutdownHandler:output_type -> wv2ray.plugin.EmptyResponse
-	7,  // 15: wv2ray.plugin.PluginOutbound.Handshake:output_type -> wv2ray.plugin.HandshakeData
-	8,  // 16: wv2ray.plugin.PluginOutbound.Process:output_type -> wv2ray.plugin.TransportData
-	10, // [10:17] is the sub-list for method output_type
-	3,  // [3:10] is the sub-list for method input_type
+	1,  // 3: wv2ray.plugin.PluginOutbound.HealthCheck:input_type -> wv2ray.plugin.EmptyRequest
+	1,  // 4: wv2ray.plugin.PluginOutbound.GetInfo:input_type -> wv2ray.plugin.EmptyRequest
+	1,  // 5: wv2ray.plugin.PluginOutbound.Init:input_type -> wv2ray.plugin.EmptyRequest
+	4,  // 6: wv2ray.plugin.PluginOutbound.NewHandler:input_type -> wv2ray.plugin.NewHandlerRequest
+	5,  // 7: wv2ray.plugin.PluginOutbound.SetLocale:input_type -> wv2ray.plugin.SetLocaleRequest
+	6,  // 8: wv2ray.plugin.PluginOutbound.ShutdownHandler:input_type -> wv2ray.plugin.ShutdownHandlerRequest
+	7,  // 9: wv2ray.plugin.PluginOutbound.Handshake:input_type -> wv2ray.plugin.HandshakeData
+	8,  // 10: wv2ray.plugin.PluginOutbound.Process:input_type -> wv2ray.plugin.TransportData
+	2,  // 11: wv2ray.plugin.PluginOutbound.HealthCheck:output_type -> wv2ray.plugin.EmptyResponse
+	3,  // 12: wv2ray.plugin.PluginOutbound.GetInfo:output_type -> wv2ray.plugin.PluginInfo
+	2,  // 13: wv2ray.plugin.PluginOutbound.Init:output_type -> wv2ray.plugin.EmptyResponse
+	2,  // 14: wv2ray.plugin.PluginOutbound.NewHandler:output_type -> wv2ray.plugin.EmptyResponse
+	2,  // 15: wv2ray.plugin.PluginOutbound.SetLocale:output_type -> wv2ray.plugin.EmptyResponse
+	2,  // 16: wv2ray.plugin.PluginOutbound.ShutdownHandler:output_type -> wv2ray.plugin.EmptyResponse
+	7,  // 17: wv2ray.plugin.PluginOutbound.Handshake:output_type -> wv2ray.plugin.HandshakeData
+	8,  // 18: wv2ray.plugin.PluginOutbound.Process:output_type -> wv2ray.plugin.TransportData
+	11, // [11:19] is the sub-list for method output_type
+	3,  // [3:11] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name

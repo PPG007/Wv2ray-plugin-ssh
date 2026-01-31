@@ -119,6 +119,136 @@ func (x *MapValue) GetEntries() []*MapEntry {
 	return nil
 }
 
+// PluginDetail contains metadata about a plugin.
+type PluginDetail struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Author        string                 `protobuf:"bytes,2,opt,name=author,proto3" json:"author,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Version       string                 `protobuf:"bytes,4,opt,name=version,proto3" json:"version,omitempty"`
+	Logo          []byte                 `protobuf:"bytes,5,opt,name=logo,proto3" json:"logo,omitempty"`
+	Protocols     []string               `protobuf:"bytes,6,rep,name=protocols,proto3" json:"protocols,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PluginDetail) Reset() {
+	*x = PluginDetail{}
+	mi := &file_plugin_common_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PluginDetail) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PluginDetail) ProtoMessage() {}
+
+func (x *PluginDetail) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_common_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PluginDetail.ProtoReflect.Descriptor instead.
+func (*PluginDetail) Descriptor() ([]byte, []int) {
+	return file_plugin_common_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *PluginDetail) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *PluginDetail) GetAuthor() string {
+	if x != nil {
+		return x.Author
+	}
+	return ""
+}
+
+func (x *PluginDetail) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *PluginDetail) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *PluginDetail) GetLogo() []byte {
+	if x != nil {
+		return x.Logo
+	}
+	return nil
+}
+
+func (x *PluginDetail) GetProtocols() []string {
+	if x != nil {
+		return x.Protocols
+	}
+	return nil
+}
+
+// ListPluginsResponse is the response message for listing plugins.
+type ListPluginsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*PluginDetail        `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPluginsResponse) Reset() {
+	*x = ListPluginsResponse{}
+	mi := &file_plugin_common_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPluginsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPluginsResponse) ProtoMessage() {}
+
+func (x *ListPluginsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_common_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPluginsResponse.ProtoReflect.Descriptor instead.
+func (*ListPluginsResponse) Descriptor() ([]byte, []int) {
+	return file_plugin_common_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListPluginsResponse) GetItems() []*PluginDetail {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
 var File_plugin_common_proto protoreflect.FileDescriptor
 
 const file_plugin_common_proto_rawDesc = "" +
@@ -128,7 +258,16 @@ const file_plugin_common_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value\"=\n" +
 	"\bMapValue\x121\n" +
-	"\aentries\x18\x01 \x03(\v2\x17.wv2ray.plugin.MapEntryR\aentriesB\x15Z\x13wv2ray/proto/pluginb\x06proto3"
+	"\aentries\x18\x01 \x03(\v2\x17.wv2ray.plugin.MapEntryR\aentries\"\xa8\x01\n" +
+	"\fPluginDetail\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
+	"\x06author\x18\x02 \x01(\tR\x06author\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\tR\aversion\x12\x12\n" +
+	"\x04logo\x18\x05 \x01(\fR\x04logo\x12\x1c\n" +
+	"\tprotocols\x18\x06 \x03(\tR\tprotocols\"H\n" +
+	"\x13ListPluginsResponse\x121\n" +
+	"\x05items\x18\x01 \x03(\v2\x1b.wv2ray.plugin.PluginDetailR\x05itemsB\x15Z\x13wv2ray/proto/pluginb\x06proto3"
 
 var (
 	file_plugin_common_proto_rawDescOnce sync.Once
@@ -142,18 +281,21 @@ func file_plugin_common_proto_rawDescGZIP() []byte {
 	return file_plugin_common_proto_rawDescData
 }
 
-var file_plugin_common_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_plugin_common_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_plugin_common_proto_goTypes = []any{
-	(*MapEntry)(nil), // 0: wv2ray.plugin.MapEntry
-	(*MapValue)(nil), // 1: wv2ray.plugin.MapValue
+	(*MapEntry)(nil),            // 0: wv2ray.plugin.MapEntry
+	(*MapValue)(nil),            // 1: wv2ray.plugin.MapValue
+	(*PluginDetail)(nil),        // 2: wv2ray.plugin.PluginDetail
+	(*ListPluginsResponse)(nil), // 3: wv2ray.plugin.ListPluginsResponse
 }
 var file_plugin_common_proto_depIdxs = []int32{
 	0, // 0: wv2ray.plugin.MapValue.entries:type_name -> wv2ray.plugin.MapEntry
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 1: wv2ray.plugin.ListPluginsResponse.items:type_name -> wv2ray.plugin.PluginDetail
+	2, // [2:2] is the sub-list for method output_type
+	2, // [2:2] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_plugin_common_proto_init() }
@@ -167,7 +309,7 @@ func file_plugin_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plugin_common_proto_rawDesc), len(file_plugin_common_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
