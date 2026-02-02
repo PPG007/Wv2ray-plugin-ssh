@@ -1,10 +1,10 @@
-# Wv2ray-plugin-template
+# Wv2ray-plugin-ssh
 
 [中文](./README_zh.md)
 
-This repository is a template of wv2ray plugin.
+This repository is a Wv2ray plugin which supports forward requests through SSH dynamic port forwarding.
 
-The plugin is powered by [go-plugin](https://github.com/hashicorp/go-plugin) and based on [grpc](https://grpc.io/)，so the plugin can be writtern in any language that supports grpc. This repository is a template of wv2ray plugin written in golang.
+The plugin is powered by [go-plugin](https://github.com/hashicorp/go-plugin) and based on [grpc](https://grpc.io/)，so the plugin can be writtern in any language that supports grpc. This repository is written in golang.
 
 ## Architecture
 

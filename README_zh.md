@@ -1,10 +1,10 @@
-# Wv2ray-plugin-template
+# Wv2ray-plugin-ssh
 
 [English](./README.md)
 
-本仓库为 wv2ray 插件的模板。
+本仓库为通过 SSH 动态端口转发支持代理请求的 Wv2ray 插件。
 
-该插件基于 [go-plugin](https://github.com/hashicorp/go-plugin) 并使用 [gRPC](https://grpc.io/)，因此插件可以用任何支持 gRPC 的语言实现。本仓库是用 Go 编写的示例模板。
+该插件基于 [go-plugin](https://github.com/hashicorp/go-plugin) 并使用 [gRPC](https://grpc.io/)，因此插件可以用任何支持 gRPC 的语言实现。本仓库是用 Go 编写的。
 
 ## 架构
 
