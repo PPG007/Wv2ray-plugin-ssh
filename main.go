@@ -20,10 +20,10 @@ import (
 )
 
 const (
-	PLUGIN_NAME        = "wv2ray-plugin-ssh"
+	PLUGIN_NAME        = "Wv2ray-plugin-ssh"
 	PLUGIN_AUTHOR      = "PPG007"
 	PLUGIN_VERSION     = "v1.0.0"
-	PLUGIN_DESCRIPTION = "A SSH plugin for WV2Ray"
+	PLUGIN_DESCRIPTION = "A SSH plugin for Wv2Ray"
 
 	PROTOCOL_SSH = "ssh"
 
