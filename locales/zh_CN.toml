@@ -1,3 +1,4 @@
 [plugin]
 username = "用户名"
 password = "密码"
+key = "ssh密钥"

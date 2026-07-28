@@ -8,8 +8,9 @@ import "plugin/common.proto";
 
 // ConfigFieldType defines the type of a configuration field.
 enum ConfigFieldType {
-  INPUT  = 0;
-  SELECT = 1;
+  INPUT    = 0;
+  SELECT   = 1;
+  TEXTAREA = 2;
 }
 
 // ConfigFieldValueType defines the value type of a configuration field.

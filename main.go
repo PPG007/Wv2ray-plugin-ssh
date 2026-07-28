@@ -22,13 +22,14 @@ import (
 const (
 	PLUGIN_NAME        = "Wv2ray-plugin-ssh"
 	PLUGIN_AUTHOR      = "PPG007"
-	PLUGIN_VERSION     = "v1.0.0"
+	PLUGIN_VERSION     = "v1.1.0"
 	PLUGIN_DESCRIPTION = "A SSH plugin for Wv2Ray"
 
 	PROTOCOL_SSH = "ssh"
 
 	USERNAME_KEY = "username"
 	PASSWORD_KEY = "password"
+	SSH_KEY_KEY  = "key"
 
 	DEFAULT_TIMEOUT = 5 * time.Second
 )
@@ -45,6 +46,7 @@ var (
 	ErrHandlerNotExists     = errors.New("handler not exists")
 	ErrHandlerNotReady      = errors.New("handler not ready")
 	ErrUnsupportedProtocol  = errors.New("unsupported protocol")
+	ErrNoAuthMethod         = errors.New("neither ssh key nor password is configured")
 )
 
 type SSHPlugin struct {
@@ -81,6 +83,43 @@ func (s *sshHandler) getPassword() string {
 		}
 	}
 	return ""
+}
+
+func (s *sshHandler) getKey() string {
+	for _, prop := range s.properties {
+		if prop.Field == SSH_KEY_KEY {
+			return prop.Value.GetStrValue()
+		}
+	}
+	return ""
+}
+
+// getAuthMethods builds the auth method list, ssh key first and password as
+// fallback. When the key is encrypted, the password is used as its passphrase.
+func (s *sshHandler) getAuthMethods() ([]ssh.AuthMethod, error) {
+	var (
+		methods  []ssh.AuthMethod
+		key      = s.getKey()
+		password = s.getPassword()
+	)
+	if key != "" {
+		signer, err := ssh.ParsePrivateKey([]byte(key))
+		var passphraseErr *ssh.PassphraseMissingError
+		if errors.As(err, &passphraseErr) && password != "" {
+			signer, err = ssh.ParsePrivateKeyWithPassphrase([]byte(key), []byte(password))
+		}
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse ssh key: %w", err)
+		}
+		methods = append(methods, ssh.PublicKeys(signer))
+	}
+	if password != "" {
+		methods = append(methods, ssh.Password(password))
+	}
+	if len(methods) == 0 {
+		return nil, ErrNoAuthMethod
+	}
+	return methods, nil
 }
 
 func (s *sshHandler) reset() {
@@ -184,12 +223,17 @@ func (p *SSHPlugin) GetInfo(ctx context.Context, req *pb_plugin.EmptyRequest) (*
 							FieldLabel: p.t("plugin.username"),
 							FieldType:  pb_plugin.ConfigFieldType_INPUT,
 							ValueType:  pb_plugin.ConfigFieldValueType_STRING,
-							Required:   true,
 						},
 						{
 							Field:      PASSWORD_KEY,
 							FieldLabel: p.t("plugin.password"),
 							FieldType:  pb_plugin.ConfigFieldType_INPUT,
+							ValueType:  pb_plugin.ConfigFieldValueType_STRING,
+						},
+						{
+							Field:      SSH_KEY_KEY,
+							FieldLabel: p.t("plugin.key"),
+							FieldType:  pb_plugin.ConfigFieldType_TEXTAREA,
 							ValueType:  pb_plugin.ConfigFieldValueType_STRING,
 						},
 					},
@@ -242,6 +286,10 @@ func (p *SSHPlugin) Handshake(stream pb_plugin.PluginOutbound_HandshakeServer) e
 	)
 	defer serverConn.Close()
 	defer clientConn.Close()
+	authMethods, err := handler.getAuthMethods()
+	if err != nil {
+		return err
+	}
 	go func() {
 		// serverConn -> grpc stream
 		buffer := make([]byte, 8*1024)
@@ -279,10 +327,8 @@ func (p *SSHPlugin) Handshake(stream pb_plugin.PluginOutbound_HandshakeServer) e
 		}
 	}()
 	sshConn, chans, reqs, err := ssh.NewClientConn(serverConn, "", &ssh.ClientConfig{
-		User: handler.getUsername(),
-		Auth: []ssh.AuthMethod{
-			ssh.Password(handler.getPassword()),
-		},
+		User:            handler.getUsername(),
+		Auth:            authMethods,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         DEFAULT_TIMEOUT,
 	})

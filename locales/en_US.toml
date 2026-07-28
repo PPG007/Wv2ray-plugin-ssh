@@ -1,3 +1,4 @@
 [plugin]
 username = "Username"
 password = "Password"
+key = "SSH Key"

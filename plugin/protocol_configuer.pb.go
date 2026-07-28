@@ -25,8 +25,9 @@ const (
 type ConfigFieldType int32
 
 const (
-	ConfigFieldType_INPUT  ConfigFieldType = 0
-	ConfigFieldType_SELECT ConfigFieldType = 1
+	ConfigFieldType_INPUT    ConfigFieldType = 0
+	ConfigFieldType_SELECT   ConfigFieldType = 1
+	ConfigFieldType_TEXTAREA ConfigFieldType = 2
 )
 
 // Enum value maps for ConfigFieldType.
@@ -34,10 +35,12 @@ var (
 	ConfigFieldType_name = map[int32]string{
 		0: "INPUT",
 		1: "SELECT",
+		2: "TEXTAREA",
 	}
 	ConfigFieldType_value = map[string]int32{
-		"INPUT":  0,
-		"SELECT": 1,
+		"INPUT":    0,
+		"SELECT":   1,
+		"TEXTAREA": 2,
 	}
 )
 
@@ -715,11 +718,12 @@ const file_plugin_protocol_configuer_proto_rawDesc = "" +
 	"\x17BriefProtocolProperties\x12D\n" +
 	"\n" +
 	"properties\x18\x01 \x03(\v2$.wv2ray.plugin.BriefProtocolPropertyR\n" +
-	"properties*(\n" +
+	"properties*6\n" +
 	"\x0fConfigFieldType\x12\t\n" +
 	"\x05INPUT\x10\x00\x12\n" +
 	"\n" +
-	"\x06SELECT\x10\x01*>\n" +
+	"\x06SELECT\x10\x01\x12\f\n" +
+	"\bTEXTAREA\x10\x02*>\n" +
 	"\x14ConfigFieldValueType\x12\n" +
 	"\n" +
 	"\x06STRING\x10\x00\x12\a\n" +
