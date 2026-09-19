@@ -27,6 +27,8 @@ const (
 	PluginOutbound_ShutdownHandler_FullMethodName = "/wv2ray.plugin.PluginOutbound/ShutdownHandler"
 	PluginOutbound_Handshake_FullMethodName       = "/wv2ray.plugin.PluginOutbound/Handshake"
 	PluginOutbound_Process_FullMethodName         = "/wv2ray.plugin.PluginOutbound/Process"
+	PluginOutbound_ParseLink_FullMethodName       = "/wv2ray.plugin.PluginOutbound/ParseLink"
+	PluginOutbound_SerializeLink_FullMethodName   = "/wv2ray.plugin.PluginOutbound/SerializeLink"
 )
 
 // PluginOutboundClient is the client API for PluginOutbound service.
@@ -51,6 +53,10 @@ type PluginOutboundClient interface {
 	Handshake(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[HandshakeData, HandshakeData], error)
 	// Process processes streaming data.
 	Process(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[TransportData, TransportData], error)
+	// ParseLink parses a share link and returns a brief connection representation.
+	ParseLink(ctx context.Context, in *ParseLinkRequest, opts ...grpc.CallOption) (*BriefConnection, error)
+	// SerializeLink serializes a brief connection representation into a share link.
+	SerializeLink(ctx context.Context, in *BriefConnection, opts ...grpc.CallOption) (*SerializeLinkResponse, error)
 }
 
 type pluginOutboundClient struct {
@@ -147,6 +153,26 @@ func (c *pluginOutboundClient) Process(ctx context.Context, opts ...grpc.CallOpt
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type PluginOutbound_ProcessClient = grpc.BidiStreamingClient[TransportData, TransportData]
 
+func (c *pluginOutboundClient) ParseLink(ctx context.Context, in *ParseLinkRequest, opts ...grpc.CallOption) (*BriefConnection, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BriefConnection)
+	err := c.cc.Invoke(ctx, PluginOutbound_ParseLink_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pluginOutboundClient) SerializeLink(ctx context.Context, in *BriefConnection, opts ...grpc.CallOption) (*SerializeLinkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SerializeLinkResponse)
+	err := c.cc.Invoke(ctx, PluginOutbound_SerializeLink_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PluginOutboundServer is the server API for PluginOutbound service.
 // All implementations must embed UnimplementedPluginOutboundServer
 // for forward compatibility.
@@ -169,6 +195,10 @@ type PluginOutboundServer interface {
 	Handshake(grpc.BidiStreamingServer[HandshakeData, HandshakeData]) error
 	// Process processes streaming data.
 	Process(grpc.BidiStreamingServer[TransportData, TransportData]) error
+	// ParseLink parses a share link and returns a brief connection representation.
+	ParseLink(context.Context, *ParseLinkRequest) (*BriefConnection, error)
+	// SerializeLink serializes a brief connection representation into a share link.
+	SerializeLink(context.Context, *BriefConnection) (*SerializeLinkResponse, error)
 	mustEmbedUnimplementedPluginOutboundServer()
 }
 
@@ -202,6 +232,12 @@ func (UnimplementedPluginOutboundServer) Handshake(grpc.BidiStreamingServer[Hand
 }
 func (UnimplementedPluginOutboundServer) Process(grpc.BidiStreamingServer[TransportData, TransportData]) error {
 	return status.Error(codes.Unimplemented, "method Process not implemented")
+}
+func (UnimplementedPluginOutboundServer) ParseLink(context.Context, *ParseLinkRequest) (*BriefConnection, error) {
+	return nil, status.Error(codes.Unimplemented, "method ParseLink not implemented")
+}
+func (UnimplementedPluginOutboundServer) SerializeLink(context.Context, *BriefConnection) (*SerializeLinkResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SerializeLink not implemented")
 }
 func (UnimplementedPluginOutboundServer) mustEmbedUnimplementedPluginOutboundServer() {}
 func (UnimplementedPluginOutboundServer) testEmbeddedByValue()                        {}
@@ -346,6 +382,42 @@ func _PluginOutbound_Process_Handler(srv interface{}, stream grpc.ServerStream) 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type PluginOutbound_ProcessServer = grpc.BidiStreamingServer[TransportData, TransportData]
 
+func _PluginOutbound_ParseLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ParseLinkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluginOutboundServer).ParseLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PluginOutbound_ParseLink_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluginOutboundServer).ParseLink(ctx, req.(*ParseLinkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PluginOutbound_SerializeLink_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BriefConnection)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluginOutboundServer).SerializeLink(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PluginOutbound_SerializeLink_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluginOutboundServer).SerializeLink(ctx, req.(*BriefConnection))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PluginOutbound_ServiceDesc is the grpc.ServiceDesc for PluginOutbound service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -376,6 +448,14 @@ var PluginOutbound_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ShutdownHandler",
 			Handler:    _PluginOutbound_ShutdownHandler_Handler,
+		},
+		{
+			MethodName: "ParseLink",
+			Handler:    _PluginOutbound_ParseLink_Handler,
+		},
+		{
+			MethodName: "SerializeLink",
+			Handler:    _PluginOutbound_SerializeLink_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

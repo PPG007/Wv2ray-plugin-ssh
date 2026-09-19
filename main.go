@@ -1,11 +1,18 @@
 package main
 
 import (
+	"bytes"
+	"compress/flate"
 	"context"
 	"embed"
+	"encoding/base64"
+	"encoding/pem"
 	"errors"
 	"fmt"
+	"io"
 	"net"
+	"net/url"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -22,7 +29,7 @@ import (
 const (
 	PLUGIN_NAME        = "Wv2ray-plugin-ssh"
 	PLUGIN_AUTHOR      = "PPG007"
-	PLUGIN_VERSION     = "v1.1.0"
+	PLUGIN_VERSION     = "v1.2.0"
 	PLUGIN_DESCRIPTION = "A SSH plugin for Wv2Ray"
 
 	PROTOCOL_SSH = "ssh"
@@ -47,6 +54,7 @@ var (
 	ErrHandlerNotReady      = errors.New("handler not ready")
 	ErrUnsupportedProtocol  = errors.New("unsupported protocol")
 	ErrNoAuthMethod         = errors.New("neither ssh key nor password is configured")
+	ErrInvalidKey           = errors.New("invalid ssh key")
 )
 
 type SSHPlugin struct {
@@ -68,30 +76,65 @@ type sshHandler struct {
 }
 
 func (s *sshHandler) getUsername() string {
-	for _, prop := range s.properties {
-		if prop.Field == USERNAME_KEY {
-			return prop.Value.GetStrValue()
-		}
-	}
-	return ""
+	return getPropertyValue(s.properties, USERNAME_KEY)
 }
 
 func (s *sshHandler) getPassword() string {
-	for _, prop := range s.properties {
-		if prop.Field == PASSWORD_KEY {
+	return getPropertyValue(s.properties, PASSWORD_KEY)
+}
+
+func (s *sshHandler) getKey() string {
+	return getPropertyValue(s.properties, SSH_KEY_KEY)
+}
+
+func getPropertyValue(properties []*pb_plugin.BriefProtocolProperty, key string) string {
+	for _, prop := range properties {
+		if prop.Field == key {
 			return prop.Value.GetStrValue()
 		}
 	}
 	return ""
 }
 
-func (s *sshHandler) getKey() string {
-	for _, prop := range s.properties {
-		if prop.Field == SSH_KEY_KEY {
-			return prop.Value.GetStrValue()
-		}
+func compressPrivateKey(key string) (string, string, error) {
+	block, _ := pem.Decode([]byte(key))
+	if block == nil {
+		return "", "", ErrInvalidKey
 	}
-	return ""
+	var (
+		buf = &bytes.Buffer{}
+	)
+	w, err := flate.NewWriter(buf, flate.BestCompression)
+	if err != nil {
+		return "", "", err
+	}
+	_, err = w.Write(block.Bytes)
+	if err != nil {
+		return "", "", err
+	}
+	err = w.Close()
+	if err != nil {
+		return "", "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(buf.Bytes()), block.Type, nil
+}
+
+func decompressPrivateKey(key, label string) (string, error) {
+	compressed, err := base64.RawURLEncoding.DecodeString(key)
+	if err != nil {
+		return "", err
+	}
+	reader := flate.NewReader(bytes.NewReader(compressed))
+	defer reader.Close()
+	decompressed, err := io.ReadAll(reader)
+	if err != nil {
+		return "", err
+	}
+	block := &pem.Block{
+		Type:  label,
+		Bytes: decompressed,
+	}
+	return string(pem.EncodeToMemory(block)), nil
 }
 
 // getAuthMethods builds the auth method list, ssh key first and password as
@@ -425,6 +468,87 @@ func (p *SSHPlugin) Process(stream pb_plugin.PluginOutbound_ProcessServer) error
 	}()
 	err = <-errChan
 	return err
+}
+
+func (p *SSHPlugin) ParseLink(ctx context.Context, req *pb_plugin.ParseLinkRequest) (*pb_plugin.BriefConnection, error) {
+	sshUrl, err := url.Parse(req.Link)
+	if err != nil {
+		return nil, err
+	}
+	if sshUrl.Scheme != PROTOCOL_SSH {
+		return nil, ErrUnsupportedProtocol
+	}
+	port, err := strconv.Atoi(sshUrl.Port())
+	if err != nil {
+		return nil, err
+	}
+	user := sshUrl.User
+	if user == nil {
+		return nil, ErrNoAuthMethod
+	}
+	password, _ := user.Password()
+	decompressed, _ := decompressPrivateKey(password, sshUrl.Query().Get("label"))
+	if decompressed == "" {
+		decompressed = password
+	}
+
+	return &pb_plugin.BriefConnection{
+		Protocol: PROTOCOL_SSH,
+		Name:     sshUrl.Fragment,
+		Address:  sshUrl.Hostname(),
+		Port:     int64(port),
+		Properties: []*pb_plugin.BriefProtocolProperty{
+			{
+				Field: USERNAME_KEY,
+				Value: &pb_plugin.ConfigFieldValue{
+					Value: &pb_plugin.ConfigFieldValue_StrValue{
+						StrValue: user.Username(),
+					},
+				},
+			},
+			{
+				Field: func() string {
+					if decompressed != password {
+						return SSH_KEY_KEY
+					}
+					return PASSWORD_KEY
+				}(),
+				Value: &pb_plugin.ConfigFieldValue{
+					Value: &pb_plugin.ConfigFieldValue_StrValue{
+						StrValue: decompressed,
+					},
+				},
+			},
+		},
+	}, nil
+}
+
+func (p *SSHPlugin) SerializeLink(ctx context.Context, req *pb_plugin.BriefConnection) (*pb_plugin.SerializeLinkResponse, error) {
+	var (
+		username = getPropertyValue(req.Properties, USERNAME_KEY)
+		password = getPropertyValue(req.Properties, PASSWORD_KEY)
+		priv     = getPropertyValue(req.Properties, SSH_KEY_KEY)
+		query    = url.Values{}
+	)
+	if password == "" && priv != "" {
+		compressed, label, err := compressPrivateKey(priv)
+		if err != nil {
+			return nil, err
+		}
+		password = compressed
+		query.Set("label", label)
+	}
+	sshUrl := url.URL{
+		Scheme:   PROTOCOL_SSH,
+		Host:     fmt.Sprintf("%s:%d", req.Address, req.Port),
+		User:     url.UserPassword(username, password),
+		RawQuery: query.Encode(),
+		Fragment: req.Name,
+	}
+
+	return &pb_plugin.SerializeLinkResponse{
+		Link: sshUrl.String(),
+	}, nil
 }
 
 func main() {

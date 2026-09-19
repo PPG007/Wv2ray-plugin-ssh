@@ -516,11 +516,191 @@ func (x *TransportData) GetData() []byte {
 	return nil
 }
 
+type BriefConnection struct {
+	state          protoimpl.MessageState   `protogen:"open.v1"`
+	Name           string                   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Protocol       string                   `protobuf:"bytes,2,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	Address        string                   `protobuf:"bytes,3,opt,name=address,proto3" json:"address,omitempty"`
+	Port           int64                    `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
+	StreamSettings *StreamSettings          `protobuf:"bytes,5,opt,name=stream_settings,json=streamSettings,proto3" json:"stream_settings,omitempty"`
+	Properties     []*BriefProtocolProperty `protobuf:"bytes,6,rep,name=properties,proto3" json:"properties,omitempty"`
+	MuxSetting     *MuxSetting              `protobuf:"bytes,7,opt,name=mux_setting,json=muxSetting,proto3" json:"mux_setting,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *BriefConnection) Reset() {
+	*x = BriefConnection{}
+	mi := &file_plugin_service_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BriefConnection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BriefConnection) ProtoMessage() {}
+
+func (x *BriefConnection) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_service_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BriefConnection.ProtoReflect.Descriptor instead.
+func (*BriefConnection) Descriptor() ([]byte, []int) {
+	return file_plugin_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *BriefConnection) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *BriefConnection) GetProtocol() string {
+	if x != nil {
+		return x.Protocol
+	}
+	return ""
+}
+
+func (x *BriefConnection) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *BriefConnection) GetPort() int64 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *BriefConnection) GetStreamSettings() *StreamSettings {
+	if x != nil {
+		return x.StreamSettings
+	}
+	return nil
+}
+
+func (x *BriefConnection) GetProperties() []*BriefProtocolProperty {
+	if x != nil {
+		return x.Properties
+	}
+	return nil
+}
+
+func (x *BriefConnection) GetMuxSetting() *MuxSetting {
+	if x != nil {
+		return x.MuxSetting
+	}
+	return nil
+}
+
+type ParseLinkRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Link          string                 `protobuf:"bytes,1,opt,name=link,proto3" json:"link,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ParseLinkRequest) Reset() {
+	*x = ParseLinkRequest{}
+	mi := &file_plugin_service_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ParseLinkRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ParseLinkRequest) ProtoMessage() {}
+
+func (x *ParseLinkRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_service_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ParseLinkRequest.ProtoReflect.Descriptor instead.
+func (*ParseLinkRequest) Descriptor() ([]byte, []int) {
+	return file_plugin_service_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *ParseLinkRequest) GetLink() string {
+	if x != nil {
+		return x.Link
+	}
+	return ""
+}
+
+type SerializeLinkResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Link          string                 `protobuf:"bytes,1,opt,name=link,proto3" json:"link,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SerializeLinkResponse) Reset() {
+	*x = SerializeLinkResponse{}
+	mi := &file_plugin_service_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SerializeLinkResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SerializeLinkResponse) ProtoMessage() {}
+
+func (x *SerializeLinkResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_service_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SerializeLinkResponse.ProtoReflect.Descriptor instead.
+func (*SerializeLinkResponse) Descriptor() ([]byte, []int) {
+	return file_plugin_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SerializeLinkResponse) GetLink() string {
+	if x != nil {
+		return x.Link
+	}
+	return ""
+}
+
 var File_plugin_service_proto protoreflect.FileDescriptor
 
 const file_plugin_service_proto_rawDesc = "" +
 	"\n" +
-	"\x14plugin/service.proto\x12\rwv2ray.plugin\x1a\x1fplugin/protocol_configuer.proto\"\x0e\n" +
+	"\x14plugin/service.proto\x12\rwv2ray.plugin\x1a\x1fplugin/protocol_configuer.proto\x1a\x1bplugin/stream_setting.proto\x1a\x10plugin/mux.proto\"\x0e\n" +
 	"\fEmptyRequest\"\x0f\n" +
 	"\rEmptyResponse\"\xcb\x01\n" +
 	"\n" +
@@ -552,10 +732,25 @@ const file_plugin_service_proto_rawDesc = "" +
 	"\anetwork\x18\x02 \x01(\x0e2\x16.wv2ray.plugin.NetworkR\anetwork\x12\x1b\n" +
 	"\tdest_addr\x18\x03 \x01(\tR\bdestAddr\x12\x1b\n" +
 	"\tdest_port\x18\x04 \x01(\x04R\bdestPort\x12\x12\n" +
-	"\x04data\x18\x05 \x01(\fR\x04data*+\n" +
+	"\x04data\x18\x05 \x01(\fR\x04data\"\xb9\x02\n" +
+	"\x0fBriefConnection\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" +
+	"\bprotocol\x18\x02 \x01(\tR\bprotocol\x12\x18\n" +
+	"\aaddress\x18\x03 \x01(\tR\aaddress\x12\x12\n" +
+	"\x04port\x18\x04 \x01(\x03R\x04port\x12F\n" +
+	"\x0fstream_settings\x18\x05 \x01(\v2\x1d.wv2ray.plugin.StreamSettingsR\x0estreamSettings\x12D\n" +
+	"\n" +
+	"properties\x18\x06 \x03(\v2$.wv2ray.plugin.BriefProtocolPropertyR\n" +
+	"properties\x12:\n" +
+	"\vmux_setting\x18\a \x01(\v2\x19.wv2ray.plugin.MuxSettingR\n" +
+	"muxSetting\"&\n" +
+	"\x10ParseLinkRequest\x12\x12\n" +
+	"\x04link\x18\x01 \x01(\tR\x04link\"+\n" +
+	"\x15SerializeLinkResponse\x12\x12\n" +
+	"\x04link\x18\x01 \x01(\tR\x04link*+\n" +
 	"\aNetwork\x12\x0f\n" +
 	"\vNETWORK_TCP\x10\x00\x12\x0f\n" +
-	"\vNETWORK_UDP\x10\x012\xea\x04\n" +
+	"\vNETWORK_UDP\x10\x012\x8f\x06\n" +
 	"\x0ePluginOutbound\x12H\n" +
 	"\vHealthCheck\x12\x1b.wv2ray.plugin.EmptyRequest\x1a\x1c.wv2ray.plugin.EmptyResponse\x12A\n" +
 	"\aGetInfo\x12\x1b.wv2ray.plugin.EmptyRequest\x1a\x19.wv2ray.plugin.PluginInfo\x12A\n" +
@@ -565,7 +760,9 @@ const file_plugin_service_proto_rawDesc = "" +
 	"\tSetLocale\x12\x1f.wv2ray.plugin.SetLocaleRequest\x1a\x1c.wv2ray.plugin.EmptyResponse\x12V\n" +
 	"\x0fShutdownHandler\x12%.wv2ray.plugin.ShutdownHandlerRequest\x1a\x1c.wv2ray.plugin.EmptyResponse\x12K\n" +
 	"\tHandshake\x12\x1c.wv2ray.plugin.HandshakeData\x1a\x1c.wv2ray.plugin.HandshakeData(\x010\x01\x12I\n" +
-	"\aProcess\x12\x1c.wv2ray.plugin.TransportData\x1a\x1c.wv2ray.plugin.TransportData(\x010\x01B\x15Z\x13wv2ray/proto/pluginb\x06proto3"
+	"\aProcess\x12\x1c.wv2ray.plugin.TransportData\x1a\x1c.wv2ray.plugin.TransportData(\x010\x01\x12L\n" +
+	"\tParseLink\x12\x1f.wv2ray.plugin.ParseLinkRequest\x1a\x1e.wv2ray.plugin.BriefConnection\x12U\n" +
+	"\rSerializeLink\x12\x1e.wv2ray.plugin.BriefConnection\x1a$.wv2ray.plugin.SerializeLinkResponseB\x15Z\x13wv2ray/proto/pluginb\x06proto3"
 
 var (
 	file_plugin_service_proto_rawDescOnce sync.Once
@@ -580,7 +777,7 @@ func file_plugin_service_proto_rawDescGZIP() []byte {
 }
 
 var file_plugin_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_plugin_service_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_plugin_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_plugin_service_proto_goTypes = []any{
 	(Network)(0),                   // 0: wv2ray.plugin.Network
 	(*EmptyRequest)(nil),           // 1: wv2ray.plugin.EmptyRequest
@@ -591,34 +788,46 @@ var file_plugin_service_proto_goTypes = []any{
 	(*ShutdownHandlerRequest)(nil), // 6: wv2ray.plugin.ShutdownHandlerRequest
 	(*HandshakeData)(nil),          // 7: wv2ray.plugin.HandshakeData
 	(*TransportData)(nil),          // 8: wv2ray.plugin.TransportData
-	(*ProtocolConfigDetail)(nil),   // 9: wv2ray.plugin.ProtocolConfigDetail
-	(*BriefProtocolProperty)(nil),  // 10: wv2ray.plugin.BriefProtocolProperty
+	(*BriefConnection)(nil),        // 9: wv2ray.plugin.BriefConnection
+	(*ParseLinkRequest)(nil),       // 10: wv2ray.plugin.ParseLinkRequest
+	(*SerializeLinkResponse)(nil),  // 11: wv2ray.plugin.SerializeLinkResponse
+	(*ProtocolConfigDetail)(nil),   // 12: wv2ray.plugin.ProtocolConfigDetail
+	(*BriefProtocolProperty)(nil),  // 13: wv2ray.plugin.BriefProtocolProperty
+	(*StreamSettings)(nil),         // 14: wv2ray.plugin.StreamSettings
+	(*MuxSetting)(nil),             // 15: wv2ray.plugin.MuxSetting
 }
 var file_plugin_service_proto_depIdxs = []int32{
-	9,  // 0: wv2ray.plugin.PluginInfo.protocols:type_name -> wv2ray.plugin.ProtocolConfigDetail
-	10, // 1: wv2ray.plugin.NewHandlerRequest.properties:type_name -> wv2ray.plugin.BriefProtocolProperty
+	12, // 0: wv2ray.plugin.PluginInfo.protocols:type_name -> wv2ray.plugin.ProtocolConfigDetail
+	13, // 1: wv2ray.plugin.NewHandlerRequest.properties:type_name -> wv2ray.plugin.BriefProtocolProperty
 	0,  // 2: wv2ray.plugin.TransportData.network:type_name -> wv2ray.plugin.Network
-	1,  // 3: wv2ray.plugin.PluginOutbound.HealthCheck:input_type -> wv2ray.plugin.EmptyRequest
-	1,  // 4: wv2ray.plugin.PluginOutbound.GetInfo:input_type -> wv2ray.plugin.EmptyRequest
-	1,  // 5: wv2ray.plugin.PluginOutbound.Init:input_type -> wv2ray.plugin.EmptyRequest
-	4,  // 6: wv2ray.plugin.PluginOutbound.NewHandler:input_type -> wv2ray.plugin.NewHandlerRequest
-	5,  // 7: wv2ray.plugin.PluginOutbound.SetLocale:input_type -> wv2ray.plugin.SetLocaleRequest
-	6,  // 8: wv2ray.plugin.PluginOutbound.ShutdownHandler:input_type -> wv2ray.plugin.ShutdownHandlerRequest
-	7,  // 9: wv2ray.plugin.PluginOutbound.Handshake:input_type -> wv2ray.plugin.HandshakeData
-	8,  // 10: wv2ray.plugin.PluginOutbound.Process:input_type -> wv2ray.plugin.TransportData
-	2,  // 11: wv2ray.plugin.PluginOutbound.HealthCheck:output_type -> wv2ray.plugin.EmptyResponse
-	3,  // 12: wv2ray.plugin.PluginOutbound.GetInfo:output_type -> wv2ray.plugin.PluginInfo
-	2,  // 13: wv2ray.plugin.PluginOutbound.Init:output_type -> wv2ray.plugin.EmptyResponse
-	2,  // 14: wv2ray.plugin.PluginOutbound.NewHandler:output_type -> wv2ray.plugin.EmptyResponse
-	2,  // 15: wv2ray.plugin.PluginOutbound.SetLocale:output_type -> wv2ray.plugin.EmptyResponse
-	2,  // 16: wv2ray.plugin.PluginOutbound.ShutdownHandler:output_type -> wv2ray.plugin.EmptyResponse
-	7,  // 17: wv2ray.plugin.PluginOutbound.Handshake:output_type -> wv2ray.plugin.HandshakeData
-	8,  // 18: wv2ray.plugin.PluginOutbound.Process:output_type -> wv2ray.plugin.TransportData
-	11, // [11:19] is the sub-list for method output_type
-	3,  // [3:11] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	14, // 3: wv2ray.plugin.BriefConnection.stream_settings:type_name -> wv2ray.plugin.StreamSettings
+	13, // 4: wv2ray.plugin.BriefConnection.properties:type_name -> wv2ray.plugin.BriefProtocolProperty
+	15, // 5: wv2ray.plugin.BriefConnection.mux_setting:type_name -> wv2ray.plugin.MuxSetting
+	1,  // 6: wv2ray.plugin.PluginOutbound.HealthCheck:input_type -> wv2ray.plugin.EmptyRequest
+	1,  // 7: wv2ray.plugin.PluginOutbound.GetInfo:input_type -> wv2ray.plugin.EmptyRequest
+	1,  // 8: wv2ray.plugin.PluginOutbound.Init:input_type -> wv2ray.plugin.EmptyRequest
+	4,  // 9: wv2ray.plugin.PluginOutbound.NewHandler:input_type -> wv2ray.plugin.NewHandlerRequest
+	5,  // 10: wv2ray.plugin.PluginOutbound.SetLocale:input_type -> wv2ray.plugin.SetLocaleRequest
+	6,  // 11: wv2ray.plugin.PluginOutbound.ShutdownHandler:input_type -> wv2ray.plugin.ShutdownHandlerRequest
+	7,  // 12: wv2ray.plugin.PluginOutbound.Handshake:input_type -> wv2ray.plugin.HandshakeData
+	8,  // 13: wv2ray.plugin.PluginOutbound.Process:input_type -> wv2ray.plugin.TransportData
+	10, // 14: wv2ray.plugin.PluginOutbound.ParseLink:input_type -> wv2ray.plugin.ParseLinkRequest
+	9,  // 15: wv2ray.plugin.PluginOutbound.SerializeLink:input_type -> wv2ray.plugin.BriefConnection
+	2,  // 16: wv2ray.plugin.PluginOutbound.HealthCheck:output_type -> wv2ray.plugin.EmptyResponse
+	3,  // 17: wv2ray.plugin.PluginOutbound.GetInfo:output_type -> wv2ray.plugin.PluginInfo
+	2,  // 18: wv2ray.plugin.PluginOutbound.Init:output_type -> wv2ray.plugin.EmptyResponse
+	2,  // 19: wv2ray.plugin.PluginOutbound.NewHandler:output_type -> wv2ray.plugin.EmptyResponse
+	2,  // 20: wv2ray.plugin.PluginOutbound.SetLocale:output_type -> wv2ray.plugin.EmptyResponse
+	2,  // 21: wv2ray.plugin.PluginOutbound.ShutdownHandler:output_type -> wv2ray.plugin.EmptyResponse
+	7,  // 22: wv2ray.plugin.PluginOutbound.Handshake:output_type -> wv2ray.plugin.HandshakeData
+	8,  // 23: wv2ray.plugin.PluginOutbound.Process:output_type -> wv2ray.plugin.TransportData
+	9,  // 24: wv2ray.plugin.PluginOutbound.ParseLink:output_type -> wv2ray.plugin.BriefConnection
+	11, // 25: wv2ray.plugin.PluginOutbound.SerializeLink:output_type -> wv2ray.plugin.SerializeLinkResponse
+	16, // [16:26] is the sub-list for method output_type
+	6,  // [6:16] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_plugin_service_proto_init() }
@@ -627,13 +836,15 @@ func file_plugin_service_proto_init() {
 		return
 	}
 	file_plugin_protocol_configuer_proto_init()
+	file_plugin_stream_setting_proto_init()
+	file_plugin_mux_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plugin_service_proto_rawDesc), len(file_plugin_service_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   8,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

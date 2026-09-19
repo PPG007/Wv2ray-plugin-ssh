@@ -25,10 +25,13 @@ const (
 type StreamNetWork int32
 
 const (
-	StreamNetWork_TCP  StreamNetWork = 0
-	StreamNetWork_KCP  StreamNetWork = 1
-	StreamNetWork_GRPC StreamNetWork = 2
-	StreamNetWork_WS   StreamNetWork = 3
+	StreamNetWork_TCP         StreamNetWork = 0
+	StreamNetWork_KCP         StreamNetWork = 1
+	StreamNetWork_GRPC        StreamNetWork = 2
+	StreamNetWork_WS          StreamNetWork = 3
+	StreamNetWork_HYSTERIA    StreamNetWork = 4
+	StreamNetWork_HTTPUPGRADE StreamNetWork = 5
+	StreamNetWork_XHTTP       StreamNetWork = 6
 )
 
 // Enum value maps for StreamNetWork.
@@ -38,12 +41,18 @@ var (
 		1: "KCP",
 		2: "GRPC",
 		3: "WS",
+		4: "HYSTERIA",
+		5: "HTTPUPGRADE",
+		6: "XHTTP",
 	}
 	StreamNetWork_value = map[string]int32{
-		"TCP":  0,
-		"KCP":  1,
-		"GRPC": 2,
-		"WS":   3,
+		"TCP":         0,
+		"KCP":         1,
+		"GRPC":        2,
+		"WS":          3,
+		"HYSTERIA":    4,
+		"HTTPUPGRADE": 5,
+		"XHTTP":       6,
 	}
 )
 
@@ -72,6 +81,56 @@ func (x StreamNetWork) Number() protoreflect.EnumNumber {
 // Deprecated: Use StreamNetWork.Descriptor instead.
 func (StreamNetWork) EnumDescriptor() ([]byte, []int) {
 	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{0}
+}
+
+// StreamSecurity defines the transport security for stream settings.
+type StreamSecurity int32
+
+const (
+	StreamSecurity_NONE    StreamSecurity = 0
+	StreamSecurity_TLS     StreamSecurity = 1
+	StreamSecurity_REALITY StreamSecurity = 2
+)
+
+// Enum value maps for StreamSecurity.
+var (
+	StreamSecurity_name = map[int32]string{
+		0: "NONE",
+		1: "TLS",
+		2: "REALITY",
+	}
+	StreamSecurity_value = map[string]int32{
+		"NONE":    0,
+		"TLS":     1,
+		"REALITY": 2,
+	}
+)
+
+func (x StreamSecurity) Enum() *StreamSecurity {
+	p := new(StreamSecurity)
+	*p = x
+	return p
+}
+
+func (x StreamSecurity) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (StreamSecurity) Descriptor() protoreflect.EnumDescriptor {
+	return file_plugin_stream_setting_proto_enumTypes[1].Descriptor()
+}
+
+func (StreamSecurity) Type() protoreflect.EnumType {
+	return &file_plugin_stream_setting_proto_enumTypes[1]
+}
+
+func (x StreamSecurity) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use StreamSecurity.Descriptor instead.
+func (StreamSecurity) EnumDescriptor() ([]byte, []int) {
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{1}
 }
 
 // CertificateUsage defines the usage type of a certificate.
@@ -108,11 +167,11 @@ func (x CertificateUsage) String() string {
 }
 
 func (CertificateUsage) Descriptor() protoreflect.EnumDescriptor {
-	return file_plugin_stream_setting_proto_enumTypes[1].Descriptor()
+	return file_plugin_stream_setting_proto_enumTypes[2].Descriptor()
 }
 
 func (CertificateUsage) Type() protoreflect.EnumType {
-	return &file_plugin_stream_setting_proto_enumTypes[1]
+	return &file_plugin_stream_setting_proto_enumTypes[2]
 }
 
 func (x CertificateUsage) Number() protoreflect.EnumNumber {
@@ -121,12 +180,16 @@ func (x CertificateUsage) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CertificateUsage.Descriptor instead.
 func (CertificateUsage) EnumDescriptor() ([]byte, []int) {
-	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{1}
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{2}
 }
 
-// StreamTCPSetting represents TCP-specific stream settings.
+// StreamTCPSetting represents TCP (raw) stream settings.
+// header_type == "http" enables HTTP obfuscation, using host/path.
 type StreamTCPSetting struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
+	HeaderType    string                 `protobuf:"bytes,1,opt,name=header_type,json=headerType,proto3" json:"header_type,omitempty"`
+	Host          string                 `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
+	Path          string                 `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -161,6 +224,150 @@ func (*StreamTCPSetting) Descriptor() ([]byte, []int) {
 	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{0}
 }
 
+func (x *StreamTCPSetting) GetHeaderType() string {
+	if x != nil {
+		return x.HeaderType
+	}
+	return ""
+}
+
+func (x *StreamTCPSetting) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *StreamTCPSetting) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+// StreamXHTSetting represents XHTTP (splithttp)-specific stream settings.
+// extra holds the raw JSON of the share link's "extra" parameter, passed through as-is.
+type StreamXHTSetting struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Host          string                 `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+	Mode          string                 `protobuf:"bytes,3,opt,name=mode,proto3" json:"mode,omitempty"`
+	Extra         string                 `protobuf:"bytes,4,opt,name=extra,proto3" json:"extra,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamXHTSetting) Reset() {
+	*x = StreamXHTSetting{}
+	mi := &file_plugin_stream_setting_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamXHTSetting) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamXHTSetting) ProtoMessage() {}
+
+func (x *StreamXHTSetting) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_stream_setting_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamXHTSetting.ProtoReflect.Descriptor instead.
+func (*StreamXHTSetting) Descriptor() ([]byte, []int) {
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *StreamXHTSetting) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *StreamXHTSetting) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *StreamXHTSetting) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+func (x *StreamXHTSetting) GetExtra() string {
+	if x != nil {
+		return x.Extra
+	}
+	return ""
+}
+
+// StreamHTTPUpgradeSetting represents HTTPUpgrade-specific stream settings.
+type StreamHTTPUpgradeSetting struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Host          string                 `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamHTTPUpgradeSetting) Reset() {
+	*x = StreamHTTPUpgradeSetting{}
+	mi := &file_plugin_stream_setting_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamHTTPUpgradeSetting) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamHTTPUpgradeSetting) ProtoMessage() {}
+
+func (x *StreamHTTPUpgradeSetting) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_stream_setting_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamHTTPUpgradeSetting.ProtoReflect.Descriptor instead.
+func (*StreamHTTPUpgradeSetting) Descriptor() ([]byte, []int) {
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *StreamHTTPUpgradeSetting) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *StreamHTTPUpgradeSetting) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
 // StreamKCPSetting represents KCP-specific stream settings.
 type StreamKCPSetting struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
@@ -180,7 +387,7 @@ type StreamKCPSetting struct {
 
 func (x *StreamKCPSetting) Reset() {
 	*x = StreamKCPSetting{}
-	mi := &file_plugin_stream_setting_proto_msgTypes[1]
+	mi := &file_plugin_stream_setting_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -192,7 +399,7 @@ func (x *StreamKCPSetting) String() string {
 func (*StreamKCPSetting) ProtoMessage() {}
 
 func (x *StreamKCPSetting) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_stream_setting_proto_msgTypes[1]
+	mi := &file_plugin_stream_setting_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -205,7 +412,7 @@ func (x *StreamKCPSetting) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamKCPSetting.ProtoReflect.Descriptor instead.
 func (*StreamKCPSetting) Descriptor() ([]byte, []int) {
-	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{1}
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *StreamKCPSetting) GetMtu() int64 {
@@ -288,13 +495,14 @@ type StreamGrpcSetting struct {
 	HealthCheckTimeout  int64                  `protobuf:"varint,5,opt,name=health_check_timeout,json=healthCheckTimeout,proto3" json:"health_check_timeout,omitempty"`
 	PermitWithoutStream bool                   `protobuf:"varint,6,opt,name=permit_without_stream,json=permitWithoutStream,proto3" json:"permit_without_stream,omitempty"`
 	InitialWindowsSize  int64                  `protobuf:"varint,7,opt,name=initial_windows_size,json=initialWindowsSize,proto3" json:"initial_windows_size,omitempty"`
+	Mode                string                 `protobuf:"bytes,8,opt,name=mode,proto3" json:"mode,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
 
 func (x *StreamGrpcSetting) Reset() {
 	*x = StreamGrpcSetting{}
-	mi := &file_plugin_stream_setting_proto_msgTypes[2]
+	mi := &file_plugin_stream_setting_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -306,7 +514,7 @@ func (x *StreamGrpcSetting) String() string {
 func (*StreamGrpcSetting) ProtoMessage() {}
 
 func (x *StreamGrpcSetting) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_stream_setting_proto_msgTypes[2]
+	mi := &file_plugin_stream_setting_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -319,7 +527,7 @@ func (x *StreamGrpcSetting) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamGrpcSetting.ProtoReflect.Descriptor instead.
 func (*StreamGrpcSetting) Descriptor() ([]byte, []int) {
-	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{2}
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *StreamGrpcSetting) GetAuthority() string {
@@ -371,6 +579,13 @@ func (x *StreamGrpcSetting) GetInitialWindowsSize() int64 {
 	return 0
 }
 
+func (x *StreamGrpcSetting) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
 // StreamWSSetting represents WebSocket-specific stream settings.
 type StreamWSSetting struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
@@ -384,7 +599,7 @@ type StreamWSSetting struct {
 
 func (x *StreamWSSetting) Reset() {
 	*x = StreamWSSetting{}
-	mi := &file_plugin_stream_setting_proto_msgTypes[3]
+	mi := &file_plugin_stream_setting_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -396,7 +611,7 @@ func (x *StreamWSSetting) String() string {
 func (*StreamWSSetting) ProtoMessage() {}
 
 func (x *StreamWSSetting) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_stream_setting_proto_msgTypes[3]
+	mi := &file_plugin_stream_setting_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -409,7 +624,7 @@ func (x *StreamWSSetting) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamWSSetting.ProtoReflect.Descriptor instead.
 func (*StreamWSSetting) Descriptor() ([]byte, []int) {
-	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{3}
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *StreamWSSetting) GetPath() string {
@@ -454,7 +669,7 @@ type ServerCertificate struct {
 
 func (x *ServerCertificate) Reset() {
 	*x = ServerCertificate{}
-	mi := &file_plugin_stream_setting_proto_msgTypes[4]
+	mi := &file_plugin_stream_setting_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -466,7 +681,7 @@ func (x *ServerCertificate) String() string {
 func (*ServerCertificate) ProtoMessage() {}
 
 func (x *ServerCertificate) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_stream_setting_proto_msgTypes[4]
+	mi := &file_plugin_stream_setting_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -479,7 +694,7 @@ func (x *ServerCertificate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerCertificate.ProtoReflect.Descriptor instead.
 func (*ServerCertificate) Descriptor() ([]byte, []int) {
-	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{4}
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ServerCertificate) GetOcspStapling() int64 {
@@ -530,13 +745,16 @@ type StreamTLSSetting struct {
 	DisableSystemRoot     bool                   `protobuf:"varint,8,opt,name=disable_system_root,json=disableSystemRoot,proto3" json:"disable_system_root,omitempty"`
 	Fingerprint           string                 `protobuf:"bytes,9,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`
 	Certificates          []*ServerCertificate   `protobuf:"bytes,10,rep,name=certificates,proto3" json:"certificates,omitempty"`
+	VerifyPeerCertByName  string                 `protobuf:"bytes,11,opt,name=verify_peer_cert_by_name,json=verifyPeerCertByName,proto3" json:"verify_peer_cert_by_name,omitempty"`
+	PinnedPeerCertSha256  string                 `protobuf:"bytes,12,opt,name=pinned_peer_cert_sha256,json=pinnedPeerCertSha256,proto3" json:"pinned_peer_cert_sha256,omitempty"`
+	EchConfigList         string                 `protobuf:"bytes,13,opt,name=ech_config_list,json=echConfigList,proto3" json:"ech_config_list,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
 }
 
 func (x *StreamTLSSetting) Reset() {
 	*x = StreamTLSSetting{}
-	mi := &file_plugin_stream_setting_proto_msgTypes[5]
+	mi := &file_plugin_stream_setting_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -548,7 +766,7 @@ func (x *StreamTLSSetting) String() string {
 func (*StreamTLSSetting) ProtoMessage() {}
 
 func (x *StreamTLSSetting) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_stream_setting_proto_msgTypes[5]
+	mi := &file_plugin_stream_setting_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -561,7 +779,7 @@ func (x *StreamTLSSetting) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamTLSSetting.ProtoReflect.Descriptor instead.
 func (*StreamTLSSetting) Descriptor() ([]byte, []int) {
-	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{5}
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *StreamTLSSetting) GetServerName() string {
@@ -634,23 +852,132 @@ func (x *StreamTLSSetting) GetCertificates() []*ServerCertificate {
 	return nil
 }
 
+func (x *StreamTLSSetting) GetVerifyPeerCertByName() string {
+	if x != nil {
+		return x.VerifyPeerCertByName
+	}
+	return ""
+}
+
+func (x *StreamTLSSetting) GetPinnedPeerCertSha256() string {
+	if x != nil {
+		return x.PinnedPeerCertSha256
+	}
+	return ""
+}
+
+func (x *StreamTLSSetting) GetEchConfigList() string {
+	if x != nil {
+		return x.EchConfigList
+	}
+	return ""
+}
+
+// StreamRealitySetting represents client-side REALITY settings.
+type StreamRealitySetting struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServerName    string                 `protobuf:"bytes,1,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
+	Fingerprint   string                 `protobuf:"bytes,2,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`
+	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	ShortId       string                 `protobuf:"bytes,4,opt,name=short_id,json=shortId,proto3" json:"short_id,omitempty"`
+	Mldsa65Verify string                 `protobuf:"bytes,5,opt,name=mldsa65_verify,json=mldsa65Verify,proto3" json:"mldsa65_verify,omitempty"`
+	SpiderX       string                 `protobuf:"bytes,6,opt,name=spider_x,json=spiderX,proto3" json:"spider_x,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamRealitySetting) Reset() {
+	*x = StreamRealitySetting{}
+	mi := &file_plugin_stream_setting_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamRealitySetting) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamRealitySetting) ProtoMessage() {}
+
+func (x *StreamRealitySetting) ProtoReflect() protoreflect.Message {
+	mi := &file_plugin_stream_setting_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamRealitySetting.ProtoReflect.Descriptor instead.
+func (*StreamRealitySetting) Descriptor() ([]byte, []int) {
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *StreamRealitySetting) GetServerName() string {
+	if x != nil {
+		return x.ServerName
+	}
+	return ""
+}
+
+func (x *StreamRealitySetting) GetFingerprint() string {
+	if x != nil {
+		return x.Fingerprint
+	}
+	return ""
+}
+
+func (x *StreamRealitySetting) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *StreamRealitySetting) GetShortId() string {
+	if x != nil {
+		return x.ShortId
+	}
+	return ""
+}
+
+func (x *StreamRealitySetting) GetMldsa65Verify() string {
+	if x != nil {
+		return x.Mldsa65Verify
+	}
+	return ""
+}
+
+func (x *StreamRealitySetting) GetSpiderX() string {
+	if x != nil {
+		return x.SpiderX
+	}
+	return ""
+}
+
 // StreamSettings represents the stream settings for a connection.
 type StreamSettings struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Network       StreamNetWork          `protobuf:"varint,1,opt,name=network,proto3,enum=wv2ray.plugin.StreamNetWork" json:"network,omitempty"`
-	Security      string                 `protobuf:"bytes,2,opt,name=security,proto3" json:"security,omitempty"`
-	Tls           *StreamTLSSetting      `protobuf:"bytes,3,opt,name=tls,proto3" json:"tls,omitempty"`
-	Tcp           *StreamTCPSetting      `protobuf:"bytes,4,opt,name=tcp,proto3" json:"tcp,omitempty"`
-	Kcp           *StreamKCPSetting      `protobuf:"bytes,5,opt,name=kcp,proto3" json:"kcp,omitempty"`
-	Grpc          *StreamGrpcSetting     `protobuf:"bytes,6,opt,name=grpc,proto3" json:"grpc,omitempty"`
-	Ws            *StreamWSSetting       `protobuf:"bytes,7,opt,name=ws,proto3" json:"ws,omitempty"`
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Network       StreamNetWork             `protobuf:"varint,1,opt,name=network,proto3,enum=wv2ray.plugin.StreamNetWork" json:"network,omitempty"`
+	Security      StreamSecurity            `protobuf:"varint,2,opt,name=security,proto3,enum=wv2ray.plugin.StreamSecurity" json:"security,omitempty"`
+	Tls           *StreamTLSSetting         `protobuf:"bytes,3,opt,name=tls,proto3" json:"tls,omitempty"`
+	Tcp           *StreamTCPSetting         `protobuf:"bytes,4,opt,name=tcp,proto3" json:"tcp,omitempty"`
+	Kcp           *StreamKCPSetting         `protobuf:"bytes,5,opt,name=kcp,proto3" json:"kcp,omitempty"`
+	Grpc          *StreamGrpcSetting        `protobuf:"bytes,6,opt,name=grpc,proto3" json:"grpc,omitempty"`
+	Ws            *StreamWSSetting          `protobuf:"bytes,7,opt,name=ws,proto3" json:"ws,omitempty"`
+	Reality       *StreamRealitySetting     `protobuf:"bytes,8,opt,name=reality,proto3" json:"reality,omitempty"`
+	Xhttp         *StreamXHTSetting         `protobuf:"bytes,9,opt,name=xhttp,proto3" json:"xhttp,omitempty"`
+	Httpupgrade   *StreamHTTPUpgradeSetting `protobuf:"bytes,10,opt,name=httpupgrade,proto3" json:"httpupgrade,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StreamSettings) Reset() {
 	*x = StreamSettings{}
-	mi := &file_plugin_stream_setting_proto_msgTypes[6]
+	mi := &file_plugin_stream_setting_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -662,7 +989,7 @@ func (x *StreamSettings) String() string {
 func (*StreamSettings) ProtoMessage() {}
 
 func (x *StreamSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_plugin_stream_setting_proto_msgTypes[6]
+	mi := &file_plugin_stream_setting_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -675,7 +1002,7 @@ func (x *StreamSettings) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamSettings.ProtoReflect.Descriptor instead.
 func (*StreamSettings) Descriptor() ([]byte, []int) {
-	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{6}
+	return file_plugin_stream_setting_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *StreamSettings) GetNetwork() StreamNetWork {
@@ -685,11 +1012,11 @@ func (x *StreamSettings) GetNetwork() StreamNetWork {
 	return StreamNetWork_TCP
 }
 
-func (x *StreamSettings) GetSecurity() string {
+func (x *StreamSettings) GetSecurity() StreamSecurity {
 	if x != nil {
 		return x.Security
 	}
-	return ""
+	return StreamSecurity_NONE
 }
 
 func (x *StreamSettings) GetTls() *StreamTLSSetting {
@@ -727,12 +1054,45 @@ func (x *StreamSettings) GetWs() *StreamWSSetting {
 	return nil
 }
 
+func (x *StreamSettings) GetReality() *StreamRealitySetting {
+	if x != nil {
+		return x.Reality
+	}
+	return nil
+}
+
+func (x *StreamSettings) GetXhttp() *StreamXHTSetting {
+	if x != nil {
+		return x.Xhttp
+	}
+	return nil
+}
+
+func (x *StreamSettings) GetHttpupgrade() *StreamHTTPUpgradeSetting {
+	if x != nil {
+		return x.Httpupgrade
+	}
+	return nil
+}
+
 var File_plugin_stream_setting_proto protoreflect.FileDescriptor
 
 const file_plugin_stream_setting_proto_rawDesc = "" +
 	"\n" +
-	"\x1bplugin/stream_setting.proto\x12\rwv2ray.plugin\x1a\x13plugin/common.proto\"\x12\n" +
-	"\x10StreamTCPSetting\"\xdc\x02\n" +
+	"\x1bplugin/stream_setting.proto\x12\rwv2ray.plugin\x1a\x13plugin/common.proto\"[\n" +
+	"\x10StreamTCPSetting\x12\x1f\n" +
+	"\vheader_type\x18\x01 \x01(\tR\n" +
+	"headerType\x12\x12\n" +
+	"\x04host\x18\x02 \x01(\tR\x04host\x12\x12\n" +
+	"\x04path\x18\x03 \x01(\tR\x04path\"d\n" +
+	"\x10StreamXHTSetting\x12\x12\n" +
+	"\x04host\x18\x01 \x01(\tR\x04host\x12\x12\n" +
+	"\x04path\x18\x02 \x01(\tR\x04path\x12\x12\n" +
+	"\x04mode\x18\x03 \x01(\tR\x04mode\x12\x14\n" +
+	"\x05extra\x18\x04 \x01(\tR\x05extra\"B\n" +
+	"\x18StreamHTTPUpgradeSetting\x12\x12\n" +
+	"\x04host\x18\x01 \x01(\tR\x04host\x12\x12\n" +
+	"\x04path\x18\x02 \x01(\tR\x04path\"\xdc\x02\n" +
 	"\x10StreamKCPSetting\x12\x10\n" +
 	"\x03mtu\x18\x01 \x01(\x03R\x03mtu\x12\x10\n" +
 	"\x03tti\x18\x02 \x01(\x03R\x03tti\x12'\n" +
@@ -747,7 +1107,7 @@ const file_plugin_stream_setting_proto_rawDesc = "" +
 	"headerType\x12#\n" +
 	"\rheader_domain\x18\t \x01(\tR\fheaderDomain\x12\x12\n" +
 	"\x04seed\x18\n" +
-	" \x01(\tR\x04seed\"\xae\x02\n" +
+	" \x01(\tR\x04seed\"\xc2\x02\n" +
 	"\x11StreamGrpcSetting\x12\x1c\n" +
 	"\tauthority\x18\x01 \x01(\tR\tauthority\x12!\n" +
 	"\fservice_name\x18\x02 \x01(\tR\vserviceName\x12\x1d\n" +
@@ -756,7 +1116,8 @@ const file_plugin_stream_setting_proto_rawDesc = "" +
 	"\fidle_timeout\x18\x04 \x01(\x03R\vidleTimeout\x120\n" +
 	"\x14health_check_timeout\x18\x05 \x01(\x03R\x12healthCheckTimeout\x122\n" +
 	"\x15permit_without_stream\x18\x06 \x01(\bR\x13permitWithoutStream\x120\n" +
-	"\x14initial_windows_size\x18\a \x01(\x03R\x12initialWindowsSize\"\x97\x01\n" +
+	"\x14initial_windows_size\x18\a \x01(\x03R\x12initialWindowsSize\x12\x12\n" +
+	"\x04mode\x18\b \x01(\tR\x04mode\"\x97\x01\n" +
 	"\x0fStreamWSSetting\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12\x12\n" +
 	"\x04host\x18\x02 \x01(\tR\x04host\x121\n" +
@@ -767,7 +1128,7 @@ const file_plugin_stream_setting_proto_rawDesc = "" +
 	"\x10one_time_loading\x18\x02 \x01(\bR\x0eoneTimeLoading\x125\n" +
 	"\x05usage\x18\x03 \x01(\x0e2\x1f.wv2ray.plugin.CertificateUsageR\x05usage\x12)\n" +
 	"\x10certificate_file\x18\x04 \x01(\tR\x0fcertificateFile\x12\x19\n" +
-	"\bkey_file\x18\x05 \x01(\tR\akeyFile\"\xa7\x03\n" +
+	"\bkey_file\x18\x05 \x01(\tR\akeyFile\"\xbe\x04\n" +
 	"\x10StreamTLSSetting\x12\x1f\n" +
 	"\vserver_name\x18\x01 \x01(\tR\n" +
 	"serverName\x128\n" +
@@ -782,20 +1143,42 @@ const file_plugin_stream_setting_proto_rawDesc = "" +
 	"\x13disable_system_root\x18\b \x01(\bR\x11disableSystemRoot\x12 \n" +
 	"\vfingerprint\x18\t \x01(\tR\vfingerprint\x12D\n" +
 	"\fcertificates\x18\n" +
-	" \x03(\v2 .wv2ray.plugin.ServerCertificateR\fcertificates\"\xe3\x02\n" +
+	" \x03(\v2 .wv2ray.plugin.ServerCertificateR\fcertificates\x126\n" +
+	"\x18verify_peer_cert_by_name\x18\v \x01(\tR\x14verifyPeerCertByName\x125\n" +
+	"\x17pinned_peer_cert_sha256\x18\f \x01(\tR\x14pinnedPeerCertSha256\x12&\n" +
+	"\x0fech_config_list\x18\r \x01(\tR\rechConfigList\"\xd2\x01\n" +
+	"\x14StreamRealitySetting\x12\x1f\n" +
+	"\vserver_name\x18\x01 \x01(\tR\n" +
+	"serverName\x12 \n" +
+	"\vfingerprint\x18\x02 \x01(\tR\vfingerprint\x12\x1a\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x19\n" +
+	"\bshort_id\x18\x04 \x01(\tR\ashortId\x12%\n" +
+	"\x0emldsa65_verify\x18\x05 \x01(\tR\rmldsa65Verify\x12\x19\n" +
+	"\bspider_x\x18\x06 \x01(\tR\aspiderX\"\xc3\x04\n" +
 	"\x0eStreamSettings\x126\n" +
-	"\anetwork\x18\x01 \x01(\x0e2\x1c.wv2ray.plugin.StreamNetWorkR\anetwork\x12\x1a\n" +
-	"\bsecurity\x18\x02 \x01(\tR\bsecurity\x121\n" +
+	"\anetwork\x18\x01 \x01(\x0e2\x1c.wv2ray.plugin.StreamNetWorkR\anetwork\x129\n" +
+	"\bsecurity\x18\x02 \x01(\x0e2\x1d.wv2ray.plugin.StreamSecurityR\bsecurity\x121\n" +
 	"\x03tls\x18\x03 \x01(\v2\x1f.wv2ray.plugin.StreamTLSSettingR\x03tls\x121\n" +
 	"\x03tcp\x18\x04 \x01(\v2\x1f.wv2ray.plugin.StreamTCPSettingR\x03tcp\x121\n" +
 	"\x03kcp\x18\x05 \x01(\v2\x1f.wv2ray.plugin.StreamKCPSettingR\x03kcp\x124\n" +
 	"\x04grpc\x18\x06 \x01(\v2 .wv2ray.plugin.StreamGrpcSettingR\x04grpc\x12.\n" +
-	"\x02ws\x18\a \x01(\v2\x1e.wv2ray.plugin.StreamWSSettingR\x02ws*3\n" +
+	"\x02ws\x18\a \x01(\v2\x1e.wv2ray.plugin.StreamWSSettingR\x02ws\x12=\n" +
+	"\areality\x18\b \x01(\v2#.wv2ray.plugin.StreamRealitySettingR\areality\x125\n" +
+	"\x05xhttp\x18\t \x01(\v2\x1f.wv2ray.plugin.StreamXHTSettingR\x05xhttp\x12I\n" +
+	"\vhttpupgrade\x18\n" +
+	" \x01(\v2'.wv2ray.plugin.StreamHTTPUpgradeSettingR\vhttpupgrade*]\n" +
 	"\rStreamNetWork\x12\a\n" +
 	"\x03TCP\x10\x00\x12\a\n" +
 	"\x03KCP\x10\x01\x12\b\n" +
 	"\x04GRPC\x10\x02\x12\x06\n" +
-	"\x02WS\x10\x03*;\n" +
+	"\x02WS\x10\x03\x12\f\n" +
+	"\bHYSTERIA\x10\x04\x12\x0f\n" +
+	"\vHTTPUPGRADE\x10\x05\x12\t\n" +
+	"\x05XHTTP\x10\x06*0\n" +
+	"\x0eStreamSecurity\x12\b\n" +
+	"\x04NONE\x10\x00\x12\a\n" +
+	"\x03TLS\x10\x01\x12\v\n" +
+	"\aREALITY\x10\x02*;\n" +
 	"\x10CertificateUsage\x12\x10\n" +
 	"\fENCIPHERMENT\x10\x00\x12\n" +
 	"\n" +
@@ -814,35 +1197,43 @@ func file_plugin_stream_setting_proto_rawDescGZIP() []byte {
 	return file_plugin_stream_setting_proto_rawDescData
 }
 
-var file_plugin_stream_setting_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_plugin_stream_setting_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_plugin_stream_setting_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_plugin_stream_setting_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_plugin_stream_setting_proto_goTypes = []any{
-	(StreamNetWork)(0),        // 0: wv2ray.plugin.StreamNetWork
-	(CertificateUsage)(0),     // 1: wv2ray.plugin.CertificateUsage
-	(*StreamTCPSetting)(nil),  // 2: wv2ray.plugin.StreamTCPSetting
-	(*StreamKCPSetting)(nil),  // 3: wv2ray.plugin.StreamKCPSetting
-	(*StreamGrpcSetting)(nil), // 4: wv2ray.plugin.StreamGrpcSetting
-	(*StreamWSSetting)(nil),   // 5: wv2ray.plugin.StreamWSSetting
-	(*ServerCertificate)(nil), // 6: wv2ray.plugin.ServerCertificate
-	(*StreamTLSSetting)(nil),  // 7: wv2ray.plugin.StreamTLSSetting
-	(*StreamSettings)(nil),    // 8: wv2ray.plugin.StreamSettings
-	(*MapValue)(nil),          // 9: wv2ray.plugin.MapValue
+	(StreamNetWork)(0),               // 0: wv2ray.plugin.StreamNetWork
+	(StreamSecurity)(0),              // 1: wv2ray.plugin.StreamSecurity
+	(CertificateUsage)(0),            // 2: wv2ray.plugin.CertificateUsage
+	(*StreamTCPSetting)(nil),         // 3: wv2ray.plugin.StreamTCPSetting
+	(*StreamXHTSetting)(nil),         // 4: wv2ray.plugin.StreamXHTSetting
+	(*StreamHTTPUpgradeSetting)(nil), // 5: wv2ray.plugin.StreamHTTPUpgradeSetting
+	(*StreamKCPSetting)(nil),         // 6: wv2ray.plugin.StreamKCPSetting
+	(*StreamGrpcSetting)(nil),        // 7: wv2ray.plugin.StreamGrpcSetting
+	(*StreamWSSetting)(nil),          // 8: wv2ray.plugin.StreamWSSetting
+	(*ServerCertificate)(nil),        // 9: wv2ray.plugin.ServerCertificate
+	(*StreamTLSSetting)(nil),         // 10: wv2ray.plugin.StreamTLSSetting
+	(*StreamRealitySetting)(nil),     // 11: wv2ray.plugin.StreamRealitySetting
+	(*StreamSettings)(nil),           // 12: wv2ray.plugin.StreamSettings
+	(*MapValue)(nil),                 // 13: wv2ray.plugin.MapValue
 }
 var file_plugin_stream_setting_proto_depIdxs = []int32{
-	9, // 0: wv2ray.plugin.StreamWSSetting.headers:type_name -> wv2ray.plugin.MapValue
-	1, // 1: wv2ray.plugin.ServerCertificate.usage:type_name -> wv2ray.plugin.CertificateUsage
-	6, // 2: wv2ray.plugin.StreamTLSSetting.certificates:type_name -> wv2ray.plugin.ServerCertificate
-	0, // 3: wv2ray.plugin.StreamSettings.network:type_name -> wv2ray.plugin.StreamNetWork
-	7, // 4: wv2ray.plugin.StreamSettings.tls:type_name -> wv2ray.plugin.StreamTLSSetting
-	2, // 5: wv2ray.plugin.StreamSettings.tcp:type_name -> wv2ray.plugin.StreamTCPSetting
-	3, // 6: wv2ray.plugin.StreamSettings.kcp:type_name -> wv2ray.plugin.StreamKCPSetting
-	4, // 7: wv2ray.plugin.StreamSettings.grpc:type_name -> wv2ray.plugin.StreamGrpcSetting
-	5, // 8: wv2ray.plugin.StreamSettings.ws:type_name -> wv2ray.plugin.StreamWSSetting
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	9, // [9:9] is the sub-list for extension type_name
-	9, // [9:9] is the sub-list for extension extendee
-	0, // [0:9] is the sub-list for field type_name
+	13, // 0: wv2ray.plugin.StreamWSSetting.headers:type_name -> wv2ray.plugin.MapValue
+	2,  // 1: wv2ray.plugin.ServerCertificate.usage:type_name -> wv2ray.plugin.CertificateUsage
+	9,  // 2: wv2ray.plugin.StreamTLSSetting.certificates:type_name -> wv2ray.plugin.ServerCertificate
+	0,  // 3: wv2ray.plugin.StreamSettings.network:type_name -> wv2ray.plugin.StreamNetWork
+	1,  // 4: wv2ray.plugin.StreamSettings.security:type_name -> wv2ray.plugin.StreamSecurity
+	10, // 5: wv2ray.plugin.StreamSettings.tls:type_name -> wv2ray.plugin.StreamTLSSetting
+	3,  // 6: wv2ray.plugin.StreamSettings.tcp:type_name -> wv2ray.plugin.StreamTCPSetting
+	6,  // 7: wv2ray.plugin.StreamSettings.kcp:type_name -> wv2ray.plugin.StreamKCPSetting
+	7,  // 8: wv2ray.plugin.StreamSettings.grpc:type_name -> wv2ray.plugin.StreamGrpcSetting
+	8,  // 9: wv2ray.plugin.StreamSettings.ws:type_name -> wv2ray.plugin.StreamWSSetting
+	11, // 10: wv2ray.plugin.StreamSettings.reality:type_name -> wv2ray.plugin.StreamRealitySetting
+	4,  // 11: wv2ray.plugin.StreamSettings.xhttp:type_name -> wv2ray.plugin.StreamXHTSetting
+	5,  // 12: wv2ray.plugin.StreamSettings.httpupgrade:type_name -> wv2ray.plugin.StreamHTTPUpgradeSetting
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_plugin_stream_setting_proto_init() }
@@ -856,8 +1247,8 @@ func file_plugin_stream_setting_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_plugin_stream_setting_proto_rawDesc), len(file_plugin_stream_setting_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   7,
+			NumEnums:      3,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -61,6 +61,7 @@ message ProtocolConfigProperties {
 message ProtocolConfigDetail {
   string                   protocol   = 1;
   ProtocolConfigProperties properties = 2;
+  string                   tips       = 3;
 }
 
 // ProtocolConfigList represents a list of protocol configuration details.

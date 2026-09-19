@@ -8,14 +8,44 @@ import "plugin/common.proto";
 
 // StreamNetWork defines the type of network for stream settings.
 enum StreamNetWork {
-  TCP  = 0;
-  KCP  = 1;
-  GRPC = 2;
-  WS   = 3;
+  TCP         = 0;
+  KCP         = 1;
+  GRPC        = 2;
+  WS          = 3;
+  HYSTERIA    = 4;
+  HTTPUPGRADE = 5;
+  XHTTP       = 6;
 }
 
-// StreamTCPSetting represents TCP-specific stream settings.
-message StreamTCPSetting {}
+// StreamSecurity defines the transport security for stream settings.
+enum StreamSecurity {
+  NONE    = 0;
+  TLS     = 1;
+  REALITY = 2;
+}
+
+// StreamTCPSetting represents TCP (raw) stream settings.
+// header_type == "http" enables HTTP obfuscation, using host/path.
+message StreamTCPSetting {
+  string header_type = 1;
+  string host        = 2;
+  string path        = 3;
+}
+
+// StreamXHTSetting represents XHTTP (splithttp)-specific stream settings.
+// extra holds the raw JSON of the share link's "extra" parameter, passed through as-is.
+message StreamXHTSetting {
+  string host  = 1;
+  string path  = 2;
+  string mode  = 3;
+  string extra = 4;
+}
+
+// StreamHTTPUpgradeSetting represents HTTPUpgrade-specific stream settings.
+message StreamHTTPUpgradeSetting {
+  string host = 1;
+  string path = 2;
+}
 
 // StreamKCPSetting represents KCP-specific stream settings.
 message StreamKCPSetting {
@@ -40,6 +70,7 @@ message StreamGrpcSetting {
   int64  health_check_timeout  = 5;
   bool   permit_without_stream = 6;
   int64  initial_windows_size  = 7;
+  string mode                  = 8;
 }
 
 // StreamWSSetting represents WebSocket-specific stream settings.
@@ -78,15 +109,31 @@ message StreamTLSSetting {
   bool                       disable_system_root       = 8;
   string                     fingerprint               = 9;
   repeated ServerCertificate certificates              = 10;
+  string                     verify_peer_cert_by_name  = 11;
+  string                     pinned_peer_cert_sha256   = 12;
+  string                     ech_config_list           = 13;
+}
+
+// StreamRealitySetting represents client-side REALITY settings.
+message StreamRealitySetting {
+  string server_name    = 1;
+  string fingerprint    = 2;
+  string password       = 3;
+  string short_id       = 4;
+  string mldsa65_verify = 5;
+  string spider_x       = 6;
 }
 
 // StreamSettings represents the stream settings for a connection.
 message StreamSettings {
-  StreamNetWork     network  = 1;
-  string            security = 2;
-  StreamTLSSetting  tls      = 3;
-  StreamTCPSetting  tcp      = 4;
-  StreamKCPSetting  kcp      = 5;
-  StreamGrpcSetting grpc     = 6;
-  StreamWSSetting   ws       = 7;
+  StreamNetWork            network     = 1;
+  StreamSecurity           security    = 2;
+  StreamTLSSetting         tls         = 3;
+  StreamTCPSetting         tcp         = 4;
+  StreamKCPSetting         kcp         = 5;
+  StreamGrpcSetting        grpc        = 6;
+  StreamWSSetting          ws          = 7;
+  StreamRealitySetting     reality     = 8;
+  StreamXHTSetting         xhttp       = 9;
+  StreamHTTPUpgradeSetting httpupgrade = 10;
 }

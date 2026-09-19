@@ -5,6 +5,8 @@ package wv2ray.plugin;
 option go_package = "wv2ray/proto/plugin";
 
 import "plugin/protocol_configuer.proto";
+import "plugin/stream_setting.proto";
+import "plugin/mux.proto";
 
 // EmptyRequest represents an empty request message.
 message EmptyRequest {}
@@ -61,6 +63,24 @@ message TransportData {
   bytes   data       = 5;
 }
 
+message BriefConnection {
+  string name     = 1;
+  string protocol = 2;
+  string address  = 3;
+  int64 port     = 4;
+  StreamSettings stream_settings = 5;
+  repeated BriefProtocolProperty properties = 6;
+  MuxSetting mux_setting = 7;
+}
+
+message ParseLinkRequest {
+  string link = 1;
+}
+
+message SerializeLinkResponse {
+  string link = 1;
+}
+
 // PluginOutbound defines the outbound plugin service.
 service PluginOutbound {
   // HealthCheck checks the health status of the plugin.
@@ -79,4 +99,8 @@ service PluginOutbound {
   rpc Handshake(stream HandshakeData) returns (stream HandshakeData);
   // Process processes streaming data.
   rpc Process(stream TransportData) returns (stream TransportData);
+  // ParseLink parses a share link and returns a brief connection representation.
+  rpc ParseLink(ParseLinkRequest) returns (BriefConnection);
+  // SerializeLink serializes a brief connection representation into a share link.
+  rpc SerializeLink(BriefConnection) returns (SerializeLinkResponse);
 }

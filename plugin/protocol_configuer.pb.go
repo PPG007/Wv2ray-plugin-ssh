@@ -481,6 +481,7 @@ type ProtocolConfigDetail struct {
 	state         protoimpl.MessageState    `protogen:"open.v1"`
 	Protocol      string                    `protobuf:"bytes,1,opt,name=protocol,proto3" json:"protocol,omitempty"`
 	Properties    *ProtocolConfigProperties `protobuf:"bytes,2,opt,name=properties,proto3" json:"properties,omitempty"`
+	Tips          string                    `protobuf:"bytes,3,opt,name=tips,proto3" json:"tips,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -527,6 +528,13 @@ func (x *ProtocolConfigDetail) GetProperties() *ProtocolConfigProperties {
 		return x.Properties
 	}
 	return nil
+}
+
+func (x *ProtocolConfigDetail) GetTips() string {
+	if x != nil {
+		return x.Tips
+	}
+	return ""
 }
 
 // ProtocolConfigList represents a list of protocol configuration details.
@@ -704,12 +712,13 @@ const file_plugin_protocol_configuer_proto_rawDesc = "" +
 	"\x18ProtocolConfigProperties\x12E\n" +
 	"\n" +
 	"properties\x18\x01 \x03(\v2%.wv2ray.plugin.ProtocolConfigPropertyR\n" +
-	"properties\"{\n" +
+	"properties\"\x8f\x01\n" +
 	"\x14ProtocolConfigDetail\x12\x1a\n" +
 	"\bprotocol\x18\x01 \x01(\tR\bprotocol\x12G\n" +
 	"\n" +
 	"properties\x18\x02 \x01(\v2'.wv2ray.plugin.ProtocolConfigPropertiesR\n" +
-	"properties\"W\n" +
+	"properties\x12\x12\n" +
+	"\x04tips\x18\x03 \x01(\tR\x04tips\"W\n" +
 	"\x12ProtocolConfigList\x12A\n" +
 	"\tprotocols\x18\x01 \x03(\v2#.wv2ray.plugin.ProtocolConfigDetailR\tprotocols\"d\n" +
 	"\x15BriefProtocolProperty\x12\x14\n" +
